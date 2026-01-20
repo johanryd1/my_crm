@@ -8,7 +8,7 @@ import ContactList from './components/ContactList';
 import ContactForm from './components/ContactForm';
 import Settings from './components/Settings';
 import PeopleView from './components/PeopleView';
-import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon } from './components/Icons';
+import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon, CRMIcon, ActivityIcon } from './components/Icons';
 import API_BASE_URL from './api'; // Importera din nya konfiguration
 
 function App() {
@@ -40,6 +40,8 @@ function App() {
     contact: '' // För att kunna koppla till en specifik person
   });
     const [searchTerm, setSearchTerm] = useState('')
+
+  const [activeTab, setActiveTab] = useState('contacts'); // 'contacts' eller 'activities'
 
   // --- HÄMTA DATA VID START ---
   useEffect(() => {
@@ -588,29 +590,75 @@ return (
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                  <section className="space-y-6">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                      <h2 className="text-xl font-bold mb-4 text-gray-700">Kontaktpersoner</h2>
-                      
-                      {/* Här använder vi vår nya snygga komponent */}
-                      <ContactForm onAddContact={handleAddContact} />
+                {/* Flik-navigering */}
+<div className="flex space-x-2 border-b border-gray-200 mb-6 bg-gray-50/50 p-1 rounded-t-lg">
+  <button
+    onClick={() => setActiveTab('contacts')}
+    className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
+      activeTab === 'contacts' 
+      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
+      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+    }`}
+  >
+    <CRMIcon size={18} color={activeTab === 'contacts' ? "#2563eb" : "#6b7280"} />
+    <span>Kontakter</span>
+    {/* Bonus: En liten badge som visar antal */}
+    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'contacts' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+      {contacts.length}
+    </span>
+  </button>
 
-                      <ContactList 
-                        contacts={contacts} 
-                        onContactClick={handleSelectContact} 
-                        onUpdateStatus={handleUpdateStatus} 
-                      />
-                    </div>
-                  </section>
+  <button
+    onClick={() => setActiveTab('activities')}
+    className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
+      activeTab === 'activities' 
+      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
+      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+    }`}
+  >
+    <ActivityIcon size={18} color={activeTab === 'activities' ? "#2563eb" : "#6b7280"} />
+    <span>Aktivitetslogg</span>
+    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'activities' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+      {activities.length}
+    </span>
+  </button>
+</div>
 
-                  <section className="space-y-6">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                      <h2 className="text-xl font-bold mb-4 text-gray-700">Aktivitetslogg</h2>
-                      <ActivityForm onAddActivity={addActivity} contacts={contacts} />
-                      <ActivityLog activities={activities} onDeleteActivity={deleteActivity} />
+                {/* Flik-innehåll */}
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                  {activeTab === 'contacts' && (
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                      {/* Vänster: Lista */}
+                      <div className="md:col-span-7">
+                        <h2 className="text-xl font-bold mb-4 text-gray-700">Kontaktpersoner</h2>
+                        <ContactList 
+                          contacts={contacts} 
+                          onContactClick={handleSelectContact} 
+                          onUpdateStatus={handleUpdateStatus} 
+                        />
+                      </div>
+                      {/* Höger: Formulär */}
+                      <div className="md:col-span-5 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        <h3 className="font-semibold mb-3">Ny kontakt</h3>
+                        <ContactForm onAddContact={handleAddContact} />
+                      </div>
                     </div>
-                  </section>
+                  )}
+
+                  {activeTab === 'activities' && (
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                      {/* Vänster: Lista */}
+                      <div className="md:col-span-7">
+                        <h2 className="text-xl font-bold mb-4 text-gray-700">Aktivitetslogg</h2>
+                        <ActivityLog activities={activities} onDeleteActivity={deleteActivity} />
+                      </div>
+                      {/* Höger: Formulär */}
+                      <div className="md:col-span-5 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        <h3 className="font-semibold mb-3">Logga aktivitet</h3>
+                        <ActivityForm onAddActivity={addActivity} contacts={contacts} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div> /* Slut Vy 2 */
             )}

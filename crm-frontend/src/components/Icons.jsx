@@ -53,3 +53,42 @@ export const SettingsIcon = ({ className = "h-6 w-6" }) => (
     />
   </svg>
 );
+
+// frontend/src/components/Icons.jsx (eller var du har filen)
+
+export const CRMIcon = ({ size = 24, color = "currentColor" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke={color} 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <circle cx="19" cy="11" r="3" />
+    <path d="M19 8v1" />
+    <path d="M19 13v1" />
+    <path d="M16.5 10.5l.5.5" />
+    <path d="M21 10.5l.5.5" />
+  </svg>
+);
+
+export const ActivityIcon = ({ size = 24, color = "currentColor" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke={color} 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
