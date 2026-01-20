@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { IconTrash } from './Icons';
+import API_BASE_URL from './../api'; // Importera din nya konfiguration
 
 const PRESET_COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', 
@@ -15,16 +16,16 @@ export default function Settings() {
   useEffect(() => { fetchPhases(); }, []);
 
   const fetchPhases = async () => {
-    const res = await axios.get('http://127.0.0.1:8000/api/phases/');
+    const res = await axios.get(`${API_BASE_URL}/api/phases/`);
     setPhases(res.data.sort((a, b) => a.order - b.order));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editingId) {
-      await axios.put(`http://127.0.0.1:8000/api/phases/${editingId}/`, formData);
+      await axios.put(`${API_BASE_URL}/api/phases/${editingId}/`, formData);
     } else {
-      await axios.post('http://127.0.0.1:8000/api/phases/', { ...formData, order: phases.length });
+      await axios.post(`${API_BASE_URL}/api/phases/`, { ...formData, order: phases.length });
     }
     resetForm();
     fetchPhases();
@@ -42,7 +43,7 @@ export default function Settings() {
 
   const deletePhase = async (id) => {
     if (window.confirm("Ta bort fas?")) {
-      await axios.delete(`http://127.0.0.1:8000/api/phases/${id}/`);
+      await axios.delete(`${API_BASE_URL}/api/phases/${id}/`);
       fetchPhases();
     }
   };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE_URL from './api'; // Importera din nya konfiguration
 
 export default function PeopleView() {
   const [contacts, setContacts] = useState([]);
@@ -10,7 +11,7 @@ export default function PeopleView() {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/api/contacts/');
+        const res = await axios.get(`${API_BASE_URL}/api/contacts/`);
         // Säkerställ att vi alltid sätter en array, även om res.data skulle vara null
         setContacts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {

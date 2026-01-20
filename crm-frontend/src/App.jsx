@@ -9,6 +9,7 @@ import ContactForm from './components/ContactForm';
 import Settings from './components/Settings';
 import PeopleView from './components/PeopleView';
 import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon } from './components/Icons';
+import API_BASE_URL from './api'; // Importera din nya konfiguration
 
 function App() {
   // --- STATES ---
@@ -58,7 +59,8 @@ function App() {
   // Hämta alla företag
   const fetchAccounts = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/accounts/')
+      const res = await axios.get(`${API_BASE_URL}/api/accounts/`);
+
       setAccounts(res.data)
     } catch (err) {
       console.error("Kunde inte hämta prospekt:", err)
@@ -68,7 +70,7 @@ function App() {
   // Hämta faser från API
 const fetchPhases = async () => {
   try {
-    const res = await axios.get('http://127.0.0.1:8000/api/phases/');
+    const res = await axios.get(`${API_BASE_URL}/api/phases/`);
     // Sortera efter 'order' så de kommer i rätt ordning
     setPhases(res.data.sort((a, b) => a.order - b.order));
   } catch (err) {
@@ -79,7 +81,7 @@ const fetchPhases = async () => {
 // Skapa nytt företag
 const fetchActivities = async (accountId) => {
   try {
-    const res = await axios.get(`http://127.0.0.1:8000/api/activities/`);
+    const res = await axios.get(`${API_BASE_URL}/api/activities/`);
     console.log("Alla aktiviteter från API:", res.data); // Kolla här!
       const filtered = res.data.filter(a => Number(a.account) === Number(accountId));
       console.log("Filtrerade aktiviteter för konto", accountId, ":", filtered);
@@ -91,7 +93,7 @@ const fetchActivities = async (accountId) => {
 
   const addActivity = async (activityData) => {
   try {
-    const res = await axios.post('http://127.0.0.1:8000/api/activities/', {
+    const res = await axios.post(`${API_BASE_URL}/api/activities/`, {
       ...activityData, // Här kommer 'note' och 'activity_type' från formuläret
       account: selectedAccount.id,
       date: new Date().toISOString().split('T')[0]
@@ -110,7 +112,7 @@ const deleteActivity = async (activityId) => {
   }
 
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/activities/${activityId}/`);
+    await axios.delete(`${API_BASE_URL}/api/activities/${activityId}/`);
     
     // Uppdatera statet genom att filtrera bort den raderade aktiviteten
     setActivities(prev => prev.filter(a => a.id !== activityId));
@@ -132,7 +134,7 @@ const deleteActivity = async (activityId) => {
 
     if (!newName) return
     try {
-      await axios.post('http://127.0.0.1:8000/api/accounts/', payload)
+      await axios.post(`${API_BASE_URL}/api/accounts/`, payload)
       setNewName('')
       fetchAccounts()
     } catch (err) {
@@ -144,7 +146,7 @@ const deleteActivity = async (activityId) => {
   const deleteAccount = async (id) => {
     if (!window.confirm("Vill du verkligen ta bort detta prospekt?")) return
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/accounts/${id}/`)
+      await axios.delete(`${API_BASE_URL}/api/accounts/${id}/`)
       fetchAccounts()
     } catch (err) {
       console.error("Kunde inte radera:", err)
@@ -154,7 +156,7 @@ const deleteActivity = async (activityId) => {
   // Hämta kontakter för ett specifikt företag
   const fetchContacts = async (accountId) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/contacts/`)
+      const res = await axios.get(`${API_BASE_URL}/api/contacts/`)
       // Vi filtrerar kontakterna så att vi bara ser de som hör till valt företag
       const filtered = res.data.filter(c => c.account === accountId)
       setContacts(filtered)
@@ -163,25 +165,10 @@ const deleteActivity = async (activityId) => {
     }
   }
 
-  // Skapa ny kontakt
-  //const handleAddContact = async (e) => {
-  //  e.preventDefault()
-  //  try {
-  //    await axios.post('http://127.0.0.1:8000/api/contacts/', {
-  //      ...newContact,
-  //      account: selectedAccount.id
-  //    })
-  //    setNewContact({ first_name: '', last_name: '', email: '', phone: '', role: '' })
-  //    fetchContacts(selectedAccount.id)
-  //  } catch (err) {
-  //    console.error("Kunde inte spara kontakt:", err)
-  //  }
-  //}
-
   // Skapa ny kontakt - uppdaterad för ContactForm
 const handleAddContact = async (contactData) => {
   try {
-    await axios.post('http://127.0.0.1:8000/api/contacts/', {
+    await axios.post(`${API_BASE_URL}/api/contacts/`, {
       ...contactData,           // Datan från ContactForm.jsx
       account: selectedAccount.id // Ditt valda konto-ID
     });
@@ -221,7 +208,7 @@ const handleAddContact = async (contactData) => {
     const handleUpdateAccount = async () => {
       try {
         // 1. Skicka uppdateringen till backend
-        const res = await axios.put(`http://127.0.0.1:8000/api/accounts/${editAccount.id}/`, editAccount);
+        const res = await axios.put(`${API_BASE_URL}/api/accounts/${editAccount.id}/`, editAccount);
         
         // 2. VIKTIGT: Backend svarar nu med det kompletta objektet inkl. phase_details
         const updatedAccount = res.data;
@@ -258,7 +245,7 @@ const handleAddContact = async (contactData) => {
         };
 
         const res = await axios.put(
-          `http://127.0.0.1:8000/api/contacts/${selectedContact.id}/`, 
+          `${API_BASE_URL}/api/contacts/${selectedContact.id}/`, 
           dataToSend
         );
 
@@ -280,7 +267,7 @@ const handleAddContact = async (contactData) => {
       }
 
       try {
-        const res = await axios.patch(`http://127.0.0.1:8000/api/contacts/${contactId}/`, { 
+        const res = await axios.patch(`${API_BASE_URL}/api/contacts/${contactId}/`, { 
           is_active: false 
         });
         
@@ -298,7 +285,7 @@ const handleAddContact = async (contactData) => {
 
     const handleUpdateStatus = async (contactId, newStatus) => {
       try {
-        const res = await axios.patch(`http://127.0.0.1:8000/api/contacts/${contactId}/`, { 
+        const res = await axios.patch(`${API_BASE_URL}/api/contacts/${contactId}/`, { 
           is_active: newStatus 
         });
         
