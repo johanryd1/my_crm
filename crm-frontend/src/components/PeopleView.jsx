@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import API_BASE_URL from './api'; // Importera din nya konfiguration
+import API_BASE_URL from './../api'; // Importera din nya konfiguration
 
 export default function PeopleView() {
   const [contacts, setContacts] = useState([]);
