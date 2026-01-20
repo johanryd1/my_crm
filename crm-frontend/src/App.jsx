@@ -5,6 +5,7 @@ import ContactModal from './components/ContatcModal';
 import ActivityLog from './components/ActivityLog';
 import ActivityForm from './components/ActivityForm';
 import ContactList from './components/ContactList';
+import ContactForm from './components/ContactForm';
 import Settings from './components/Settings';
 import PeopleView from './components/PeopleView';
 import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon } from './components/Icons';
@@ -17,7 +18,7 @@ function App() {
   const [newName, setNewName] = useState('')
   const [selectedAccount, setSelectedAccount] = useState(null)
   const [contacts, setContacts] = useState([])
-  const [newContact, setNewContact] = useState({ first_name: '', last_name: '', email: '', phone: '', role: '' })
+  // const [newContact, setNewContact] = useState({ first_name: '', last_name: '', email: '', phone: '', role: '' })
   const [activities, setActivities] = useState([]);
   const [phaseFilter, setPhaseFilter] = useState('all');
   const [selectedContact, setSelectedContact] = useState(null);
@@ -163,19 +164,38 @@ const deleteActivity = async (activityId) => {
   }
 
   // Skapa ny kontakt
-  const handleAddContact = async (e) => {
-    e.preventDefault()
-    try {
-      await axios.post('http://127.0.0.1:8000/api/contacts/', {
-        ...newContact,
-        account: selectedAccount.id
-      })
-      setNewContact({ first_name: '', last_name: '', email: '', phone: '', role: '' })
-      fetchContacts(selectedAccount.id)
-    } catch (err) {
-      console.error("Kunde inte spara kontakt:", err)
-    }
+  //const handleAddContact = async (e) => {
+  //  e.preventDefault()
+  //  try {
+  //    await axios.post('http://127.0.0.1:8000/api/contacts/', {
+  //      ...newContact,
+  //      account: selectedAccount.id
+  //    })
+  //    setNewContact({ first_name: '', last_name: '', email: '', phone: '', role: '' })
+  //    fetchContacts(selectedAccount.id)
+  //  } catch (err) {
+  //    console.error("Kunde inte spara kontakt:", err)
+  //  }
+  //}
+
+  // Skapa ny kontakt - uppdaterad för ContactForm
+const handleAddContact = async (contactData) => {
+  try {
+    await axios.post('http://127.0.0.1:8000/api/contacts/', {
+      ...contactData,           // Datan från ContactForm.jsx
+      account: selectedAccount.id // Ditt valda konto-ID
+    });
+
+    // Istället för att tömma statet här (det sköts i ContactForm),
+    // så hämtar vi bara den uppdaterade listan.
+    fetchContacts(selectedAccount.id);
+    
+    console.log("Kontakt skapad!");
+  } catch (err) {
+    // Bra att logga err.response?.data för att se Postgres-valideringsfel
+    console.error("Kunde inte spara kontakt:", err.response?.data || err);
   }
+};
 
   const filteredAccounts = accounts.filter(acc => {
     const matchesSearch = acc.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -585,21 +605,13 @@ return (
                   <section className="space-y-6">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                       <h2 className="text-xl font-bold mb-4 text-gray-700">Kontaktpersoner</h2>
-                      <form onSubmit={handleAddContact} className="space-y-3 mb-6">
-                        <div className="grid grid-cols-2 gap-2">
-                          <input placeholder="Förnamn" className="border p-2 rounded" value={newContact.first_name} onChange={e => setNewContact({...newContact, first_name: e.target.value})} />
-                          <input placeholder="Efternamn" className="border p-2 rounded" value={newContact.last_name} onChange={e => setNewContact({...newContact, last_name: e.target.value})} />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input placeholder="Roll" className="border p-2 rounded" value={newContact.role} onChange={e => setNewContact({...newContact, role: e.target.value})} />
-                          <input placeholder="Telefon" className="border p-2 rounded" value={newContact.phone} onChange={e => setNewContact({...newContact, phone: e.target.value})} />
-                        </div>
-                        <input type="email" placeholder="E-post" className="w-full border p-2 rounded" value={newContact.email} onChange={e => setNewContact({...newContact, email: e.target.value})} />
-                        <button className="w-full bg-blue-600 text-white p-2 rounded font-bold">Spara kontakt</button>
-                      </form>
+                      
+                      {/* Här använder vi vår nya snygga komponent */}
+                      <ContactForm onAddContact={handleAddContact} />
+
                       <ContactList 
                         contacts={contacts} 
-                        onContactClick={handleSelectContact} // Ändrat från setSelectedContact
+                        onContactClick={handleSelectContact} 
                         onUpdateStatus={handleUpdateStatus} 
                       />
                     </div>
