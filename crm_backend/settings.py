@@ -77,7 +77,7 @@ DATABASES = {
         # Om DATABASE_URL inte finns i systemet, använd dina lokala uppgifter:
         # default='postgres://crm_user:KZB570!aik.se1@localhost:5432/crm_db',
         # default='postgresql://postgres.alhqomvhqdmjzedkwmzf:KZB570!aik.se1@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?pgbouncer=true',
-        default='postgresql://postgres.alhqomvhqdmjzedkwmzf:KZB570!aik.se1@aws-1-eu-north-1.pooler.supabase.com:5432/postgres',
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres.alhqomvhqdmjzedkwmzf:KZB570!aik.se1@aws-1-eu-north-1.pooler.supabase.com:5432/postgres'),
         conn_max_age=600
     )
 }
