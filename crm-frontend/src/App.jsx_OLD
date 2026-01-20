@@ -1,0 +1,186 @@
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+
+function App() {
+  const [accounts, setAccounts] = useState([])
+  const [newName, setNewName] = useState('')
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [newContact, setNewContact] = useState({ first_name: '', last_name: '', email: '' });
+
+  useEffect(() => { fetchAccounts() }, [])
+
+  const fetchAccounts = async () => {
+    try {
+      const res = await axios.get('http://127.0.0.1:8000/api/accounts/')
+      setAccounts(res.data)
+    } catch (err) { console.error(err) }
+  }
+
+  const deleteAccount = async (id) => {
+  if (!window.confirm("Vill du verkligen ta bort detta företag?")) return;
+
+  // Hämta kontakter för ett specifikt företag
+  const fetchContacts = async (accountId) => {
+    const res = await axios.get(`http://127.0.0.1:8000/api/contacts/?account=${accountId}`);
+    // Eftersom vi inte byggt filtrering i Django än, filtrerar vi i React för enkelhetens skull:
+    const filtered = res.data.filter(c => c.account === accountId);
+    setContacts(filtered);
+  };
+
+  // Spara en ny kontakt
+  const handleAddContact = async (e) => {
+    e.preventDefault();
+    await axios.post('http://127.0.0.1:8000/api/contacts/', {
+      ...newContact,
+      account: selectedAccount.id
+    });
+    setNewContact({ first_name: '', last_name: '', email: '' });
+    fetchContacts(selectedAccount.id);
+  };
+  
+  try {
+    await axios.delete(`http://127.0.0.1:8000/api/accounts/${id}/`);
+    fetchAccounts(); // Uppdatera listan efter borttagning
+  } catch (err) {
+    console.error("Kunde inte radera:", err);
+  }
+};
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!newName) return
+    await axios.post('http://127.0.0.1:8000/api/accounts/', { name: newName })
+    setNewName('')
+    fetchAccounts()
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-8 flex justify-center">
+      <div className="w-full max-w-2xl">
+        
+        {/* LOGIK: OM INGET FÖRETAG ÄR VALT (!selectedAccount) */}
+        {!selectedAccount ? (
+          <div>
+            <h1 className="text-3xl font-bold mb-8 text-gray-800">Mina Företag</h1>
+            
+            {/* Formulär för att skapa nytt företag */}
+            <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+              <form onSubmit={handleSubmit} className="flex gap-4">
+                <input 
+                  type="text"
+                  value={newName} 
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Nytt företagsnamn..."
+                  className="flex-1 border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition">
+                  Spara
+                </button>
+              </form>
+            </div>
+
+            {/* Lista med företag */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                <h2 className="font-semibold text-gray-700">Registrerade företag</h2>
+              </div>
+              <ul className="divide-y divide-gray-200">
+                {accounts.map((acc) => (
+                  <li key={acc.id} className="px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition">
+                    <span 
+                      className="font-medium text-blue-600 cursor-pointer hover:underline flex-1"
+                      onClick={() => {
+                        setSelectedAccount(acc);
+                        fetchContacts(acc.id);
+                      }}
+                    >
+                      {acc.name}
+                    </span>
+                    
+                    <button 
+                      onClick={() => deleteAccount(acc.id)}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                      title="Radera"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          /* DETALJVY FÖR VALT FÖRETAG (Visas när selectedAccount har ett värde) */
+          <div>
+            <button 
+              onClick={() => setSelectedAccount(null)}
+              className="text-gray-600 mb-4 hover:text-black flex items-center gap-1 font-medium transition"
+            >
+              ← Tillbaka till listan
+            </button>
+            
+            <h1 className="text-3xl font-bold mb-2 text-gray-800">{selectedAccount.name}</h1>
+            <p className="text-gray-500 mb-8 font-medium">Hantering av kontaktpersoner</p>
+
+            {/* Formulär för ny kontakt */}
+            <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Lägg till ny kontakt</h3>
+              <form onSubmit={handleAddContact} className="grid grid-cols-2 gap-4">
+                <input 
+                  placeholder="Förnamn"
+                  className="border border-gray-300 p-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
+                  value={newContact.first_name}
+                  onChange={e => setNewContact({...newContact, first_name: e.target.value})}
+                  required
+                />
+                <input 
+                  placeholder="Efternamn"
+                  className="border border-gray-300 p-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
+                  value={newContact.last_name}
+                  onChange={e => setNewContact({...newContact, last_name: e.target.value})}
+                  required
+                />
+                <input 
+                  type="email"
+                  placeholder="E-postadress"
+                  className="border border-gray-300 p-2 rounded col-span-2 focus:ring-2 focus:ring-green-500 outline-none"
+                  value={newContact.email}
+                  onChange={e => setNewContact({...newContact, email: e.target.value})}
+                  required
+                />
+                <button className="bg-green-600 text-white p-2 rounded font-bold col-span-2 hover:bg-green-700 transition shadow-sm">
+                  Spara kontakt
+                </button>
+              </form>
+            </div>
+
+            {/* Lista på kontakter */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 font-semibold text-gray-700">
+                Kontakter hos {selectedAccount.name}
+              </div>
+              {contacts.length === 0 ? (
+                <p className="p-6 text-gray-500 italic text-center">Inga kontakter registrerade än.</p>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {contacts.map(c => (
+                    <div key={c.id} className="px-6 py-4 hover:bg-gray-50 transition">
+                      <p className="font-bold text-gray-800 text-lg">{c.first_name} {c.last_name}</p>
+                      <p className="text-gray-500">{c.email}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+export default App
