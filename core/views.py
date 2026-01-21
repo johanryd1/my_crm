@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
 from rest_framework import viewsets
-from .models import Account, Contact, Deal, Activity, AccountPhase
-from .serializers import AccountSerializer, ContactSerializer, DealSerializer, ActivitySerializer, AccountPhaseSerializer
+from .models import Account, Contact, Deal, Activity, DealPhase
+from .serializers import AccountSerializer, ContactSerializer, DealSerializer, ActivitySerializer, DealPhaseSerializer
 
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
@@ -20,6 +20,6 @@ class ActivityViewSet(viewsets.ModelViewSet):
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializer
 
-class AccountPhaseViewSet(viewsets.ModelViewSet):
-    queryset = AccountPhase.objects.all()
-    serializer_class = AccountPhaseSerializer
+class DealPhaseViewSet(viewsets.ModelViewSet): # Kontrollera att detta namn används
+    queryset = DealPhase.objects.all().order_by('order')
+    serializer_class = DealPhaseSerializer

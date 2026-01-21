@@ -1,28 +1,20 @@
 from django.db import models
 
-class AccountPhase(models.Model):
+class DealPhase(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    color = models.CharField(max_length=20, default="#3b82f6") # Hex-kod för Tailwind
+    color = models.CharField(max_length=20, default="#3b82f6")
     is_default = models.BooleanField(default=False)
-    order = models.IntegerField(default=0) # För att kunna sortera faserna (t.ex. Prospect -> Kund)
+    order = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
-        # Säkerställ att bara en fas kan vara "is_default"
         if self.is_default:
-            AccountPhase.objects.filter(is_default=True).update(is_default=False)
+            DealPhase.objects.filter(is_default=True).update(is_default=False)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
 class Account(models.Model):
-    phase = models.ForeignKey(
-        'AccountPhase', 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name='accounts'
-)
     name = models.CharField(max_length=255)
     website = models.URLField(blank=True)
     industry = models.CharField(max_length=100, blank=True)
@@ -46,16 +38,14 @@ class Contact(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 class Deal(models.Model):
-    STAGES = [
-        ('PROSPECT', 'Prospect'),
-        ('OFFER', 'Sent Offer'),
-        ('CLOSED_WON', 'Closed Won'),
-        ('CLOSED_LOST', 'Closed Lost'),
-    ]
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    value = models.DecimalField(max_digits=10, decimal_places=2)
-    stage = models.CharField(max_length=20, choices=STAGES, default='PROSPECT')
+    # Vi lägger till null=True på ALLA nya fält
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='deals', null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    value = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    stage = models.ForeignKey(DealPhase, on_delete=models.PROTECT, null=True, blank=True)
+
+    def __str__(self):
+        return self.name if self.name else "Namnlös affär"
 
 class Activity(models.Model):
     # Alternativ för rullistan
