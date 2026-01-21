@@ -16,8 +16,8 @@ export default function ContactModal({
 }) {
 
   // Om ingen kontakt är vald, rita inte ut någonting
-  console.log("ContactData som skickas till modalen:", contact);
-  console.log("EditData som skickas till modalen:", editData);
+  //console.log("ContactData som skickas till modalen:", contact);
+  //console.log("EditData som skickas till modalen:", editData);
   if (!contact) return null;
 
   return (

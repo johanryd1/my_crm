@@ -43,18 +43,45 @@ function App() {
 
   const [activeTab, setActiveTab] = useState('contacts'); // 'contacts' eller 'activities'
 
-  // --- HÄMTA DATA VID START ---
-  useEffect(() => {
-    // Varje gång vi byter vy...
-    setSelectedAccount(null);
-    setIsEditing(false);
 
-    // ...så hämtar vi den senaste datan från backend
-    if (view === 'dashboard') {
-      fetchAccounts();
-      fetchPhases(); // Ser till att dropdowns och filter är uppdaterade
+
+const fetchContacts = async (accountId = null) => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/api/contacts/`);
+    
+    if (accountId) {
+      // Om vi skickat med ett ID (t.ex. när vi klickat på ett företag)
+      const filtered = res.data.filter(c => c.account === accountId);
+      setContacts(filtered);
+    } else {
+      // Om inget ID skickas med (t.ex. för PeopleView), spara ALLA
+      setContacts(res.data);
     }
-  }, [view]);
+  } catch (err) {
+    console.error("Kunde inte hämta kontakter:", err);
+  }
+};
+
+// --- HÄMTA DATA VID START OCH VID VY-BYTE ---
+    useEffect(() => {
+      // Nollställ val vid vy-byte
+      setSelectedAccount(null);
+      setSelectedContact(null); // Bra att nollställa även denna
+      setIsEditing(false);
+
+      // Hämta ALLTID kontakter så att PeopleView och listor fungerar
+      fetchContacts(); 
+      
+      // Hämta konton och faser (behövs oftast i alla vyer)
+      fetchAccounts();
+      fetchPhases();
+
+      // Om du vill vara specifik kan du behålla if-satser, 
+      // men det är säkrast att ladda kontakter direkt:
+      if (view === 'people') {
+        fetchContacts();
+      }
+    }, [view]);
 
   // --- FUNKTIONER ---
   
@@ -155,17 +182,6 @@ const deleteActivity = async (activityId) => {
     }
   }
 
-  // Hämta kontakter för ett specifikt företag
-  const fetchContacts = async (accountId) => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/contacts/`)
-      // Vi filtrerar kontakterna så att vi bara ser de som hör till valt företag
-      const filtered = res.data.filter(c => c.account === accountId)
-      setContacts(filtered)
-    } catch (err) {
-      console.error("Kunde inte hämta kontakter:", err)
-    }
-  }
 
   // Skapa ny kontakt - uppdaterad för ContactForm
 const handleAddContact = async (contactData) => {
@@ -320,7 +336,11 @@ const handleAddContact = async (contactData) => {
         phone: contact.phone || '',
         role: contact.role || ''
       });
+
+      // Öppna modalen!
+      //setIsEditingContact(true);
     };
+
 
   // --- RENDERING ---
 return (
@@ -388,7 +408,12 @@ return (
         {view === 'settings' && <Settings />}
 
         {/* VY 2: PERSONER */}
-        {view === 'people' && <PeopleView />}
+        {view === 'people' && (
+          <PeopleView 
+            people={contacts} 
+            onContactClick={handleSelectContact} 
+          />
+        )}
 
         {/* VY 3: DASHBOARD (FÖRETAG) */}
         {view === 'dashboard' && (
@@ -591,38 +616,38 @@ return (
                 </div>
 
                 {/* Flik-navigering */}
-<div className="flex space-x-2 border-b border-gray-200 mb-6 bg-gray-50/50 p-1 rounded-t-lg">
-  <button
-    onClick={() => setActiveTab('contacts')}
-    className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
-      activeTab === 'contacts' 
-      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
-      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-    }`}
-  >
-    <CRMIcon size={18} color={activeTab === 'contacts' ? "#2563eb" : "#6b7280"} />
-    <span>Kontakter</span>
-    {/* Bonus: En liten badge som visar antal */}
-    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'contacts' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
-      {contacts.length}
-    </span>
-  </button>
+                <div className="flex space-x-2 border-b border-gray-200 mb-6 bg-gray-50/50 p-1 rounded-t-lg">
+                  <button
+                    onClick={() => setActiveTab('contacts')}
+                    className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      activeTab === 'contacts' 
+                      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                    }`}
+                  >
+                    <CRMIcon size={18} color={activeTab === 'contacts' ? "#2563eb" : "#6b7280"} />
+                    <span>Kontakter</span>
+                    {/* Bonus: En liten badge som visar antal */}
+                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'contacts' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+                      {contacts.length}
+                    </span>
+                  </button>
 
-  <button
-    onClick={() => setActiveTab('activities')}
-    className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
-      activeTab === 'activities' 
-      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
-      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-    }`}
-  >
-    <ActivityIcon size={18} color={activeTab === 'activities' ? "#2563eb" : "#6b7280"} />
-    <span>Aktivitetslogg</span>
-    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'activities' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
-      {activities.length}
-    </span>
-  </button>
-</div>
+                  <button
+                    onClick={() => setActiveTab('activities')}
+                    className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      activeTab === 'activities' 
+                      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                    }`}
+                  >
+                    <ActivityIcon size={18} color={activeTab === 'activities' ? "#2563eb" : "#6b7280"} />
+                    <span>Aktivitetslogg</span>
+                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'activities' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+                      {activities.length}
+                    </span>
+                  </button>
+                </div>
 
                 {/* Flik-innehåll */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
@@ -675,11 +700,24 @@ return (
               onDelete={deleteContact}
               onUpdateStatus={handleUpdateStatus}
               onDeleteActivity={deleteActivity}
-            />
+            />  
           </> /* Slut Dashboard Fragment */
         )}
 
       </div> 
+        <ContactModal 
+              contact={selectedContact}
+              activities={activities}
+              onClose={() => { setSelectedContact(null); setIsEditingContact(false); }}
+              isEditing={isEditingContact}
+              setIsEditing={setIsEditingContact}
+              editData={editContactData}
+              setEditData={setEditContactData}
+              onUpdate={handleUpdateContact}
+              onDelete={deleteContact}
+              onUpdateStatus={handleUpdateStatus}
+              onDeleteActivity={deleteActivity}
+            />
     </div> 
   );
 
