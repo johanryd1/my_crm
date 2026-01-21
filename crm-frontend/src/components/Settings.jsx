@@ -82,7 +82,7 @@ export default function Settings() {
                   key={color}
                   type="button"
                   onClick={() => setFormData({...formData, color})}
-                  className={`w-10 h-10 rounded-full border-4 transition-all ${formData.color === color ? 'border-gray-300 scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
+                  className={`w-8 h-8 rounded-full border-4 transition-all ${formData.color === color ? 'border-gray-300 scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
                   style={{ backgroundColor: color }}
                 />
               ))}
@@ -91,7 +91,7 @@ export default function Settings() {
                   type="color" 
                   value={formData.color} 
                   onChange={e => setFormData({...formData, color: e.target.value})}
-                  className="w-10 h-10 p-0 border-none bg-transparent cursor-pointer rounded-full overflow-hidden"
+                  className="w-8 h-8 p-0 border-none bg-transparent cursor-pointer rounded-full overflow-hidden"
                 />
               </div>
             </div>
