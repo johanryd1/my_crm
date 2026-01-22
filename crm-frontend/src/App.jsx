@@ -9,6 +9,7 @@ import ContactForm from './components/ContactForm';
 import Settings from './components/Settings';
 import PeopleView from './components/PeopleView';
 import Deals from './components/Deals';
+import DealModal from './components/DealModal';
 import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon, CRMIcon, ActivityIcon, DollarSign } from './components/Icons';
 import API_BASE_URL from './api'; // Importera din nya konfiguration
 
@@ -16,6 +17,7 @@ function App() {
   // --- STATES ---
   const [isEditing, setIsEditing] = useState(false);
   const [editAccount, setEditAccount] = useState({});
+  const [editingDealId, setEditingDealId] = useState(null);
   const [accounts, setAccounts] = useState([])
   const [newName, setNewName] = useState('')
   const [selectedAccount, setSelectedAccount] = useState(null)
@@ -52,6 +54,23 @@ const [newDeal, setNewDeal] = useState({
   stage: phases[0]?.id || '' // Sätter första tillgängliga fas som förval
 });
 
+// För att skapa NY
+const openCreateDealModal = () => {
+  setEditingDealId(null); // Viktigt: nollställ ID
+  setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' });
+  setShowDealModal(true);
+};
+
+// För att REDIGERA
+const openEditDealModal = (deal) => {
+  setEditingDealId(deal.id); // Sätt ID för den deal som ska ändras
+  setNewDeal({ 
+    name: deal.name, 
+    value: deal.value, 
+    stage: deal.stage 
+  });
+  setShowDealModal(true);
+};
 
 const handleCreateDeal = async () => {
   try {
@@ -105,6 +124,56 @@ const fetchContacts = async (accountId = null) => {
     }
   } catch (err) {
     console.error("Kunde inte hämta kontakter:", err);
+  }
+};
+
+const handleSaveDeal = async () => {
+  try {
+    // 1. Förbered datan. Vi kopplar affären till det konto som är öppet.
+    const payload = { 
+      ...newDeal, 
+      account: selectedAccount.id 
+    };
+
+    let response;
+
+    if (editingDealId) {
+      // 2. UPPDATERA (PUT)
+      response = await axios.put(
+        `${API_BASE_URL}/api/deals/${editingDealId}/`, 
+        payload, 
+        { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
+      );
+
+      // Uppdatera selectedAccount lokalt så vi slipper ladda om hela sidan
+      const updatedDeals = selectedAccount.deals.map(d => 
+        d.id === editingDealId ? response.data : d
+      );
+      setSelectedAccount({ ...selectedAccount, deals: updatedDeals });
+      
+    } else {
+      // 3. SKAPA NY (POST)
+      response = await axios.post(
+        `${API_BASE_URL}/api/deals/`, 
+        payload, 
+        { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
+      );
+
+      // Lägg till den nya affären i listan lokalt
+      setSelectedAccount({ 
+        ...selectedAccount, 
+        deals: [...(selectedAccount.deals || []), response.data] 
+      });
+    }
+
+    // 4. Stäng modalen och nollställ state
+    setShowDealModal(false);
+    setEditingDealId(null);
+    setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' });
+
+  } catch (err) {
+    console.error("Kunde inte spara affären:", err);
+    alert("Något gick fel när affären skulle sparas. Kontrollera att alla fält är rätt ifyllda.");
   }
 };
 
@@ -384,12 +453,9 @@ const handleAddContact = async (contactData) => {
       });
 
       // Öppna modalen!
-      //setIsEditingContact(true);
+      //setShowContactModal(true);
     };
 
-// I App.jsx
-console.log("Faser i App.jsx:", phases);
-console.log("Valt konto i App.jsx:", selectedAccount);
   // --- RENDERING ---
 return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 flex justify-center font-sans">
@@ -490,39 +556,6 @@ return (
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-
-                {/* Ta bort fasknapparna */}
-                {/* <div className="flex flex-wrap gap-2 mb-6"> */}
-                  {/* "Alla"-knappen finns alltid kvar */}
-                  {/* <button
-                    onClick={() => setPhaseFilter('all')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                      phaseFilter === 'all' 
-                        ? 'bg-gray-900 text-white shadow-lg' 
-                        : 'bg-white text-gray-500 border border-gray-100 hover:bg-gray-50'
-                    }`}
-                  >
-                    Alla
-                  </button> */}
-
-                  {/* Dynamiska knappar från dina inställningar */}
-                 {/*  {phases.map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => setPhaseFilter(p.id)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border`}
-                      style={{
-                        backgroundColor: phaseFilter === p.id ? p.color : 'white',
-                        color: phaseFilter === p.id ? 'white' : '#6b7280',
-                        borderColor: phaseFilter === p.id ? p.color : '#f3f4f6',
-                        boxShadow: phaseFilter === p.id ? `0 4px 12px ${p.color}44` : 'none'
-                      }}
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                
-                </div> */}
 
                 <div className="bg-white p-6 rounded-lg shadow-md mb-8">
                   <form onSubmit={handleSubmit} className="flex gap-4">
@@ -836,6 +869,7 @@ return (
                       selectedAccount={selectedAccount} 
                       dealPhases={phases} 
                       onAddDeal={() => setShowDealModal(true)} // Skicka med funktionen som prop
+                      onEditDeal={openEditDealModal}    // Ny funktion för redigering
                     />
                   )}
                 </div>
@@ -859,7 +893,7 @@ return (
         )}
 
       </div> 
-        <ContactModal 
+{/*         <ContactModal 
               contact={selectedContact}
               activities={activities}
               onClose={() => { setSelectedContact(null); setIsEditingContact(false); }}
@@ -871,71 +905,19 @@ return (
               onDelete={deleteContact}
               onUpdateStatus={handleUpdateStatus}
               onDeleteActivity={deleteActivity}
-            />
+            /> */}
 
 
             {showDealModal && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-                <div className="p-6 border-b border-gray-100">
-                  <h2 className="text-xl font-bold text-gray-900">Skapa ny affärsmöjlighet</h2>
-                  <p className="text-sm text-gray-500">Lägg till detaljer för den nya affären på {selectedAccount.name}</p>
-                </div>
-                
-                <div className="p-6 space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Affärens namn</label>
-                    <input 
-                      type="text"
-                      className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                      placeholder="t.ex. Årslicens 2024"
-                      value={newDeal.name}
-                      onChange={e => setNewDeal({...newDeal, name: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Värde (SEK)</label>
-                      <input 
-                        type="number"
-                        className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                        placeholder="0"
-                        value={newDeal.value}
-                        onChange={e => setNewDeal({...newDeal, value: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Fas</label>
-                      <select 
-                        className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                        value={newDeal.stage}
-                        onChange={e => setNewDeal({...newDeal, stage: e.target.value})}
-                      >
-                        {phases.map(phase => (
-                          <option key={phase.id} value={phase.id}>{phase.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 bg-gray-50 flex gap-3">
-                  <button 
-                    onClick={handleCreateDeal}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-200"
-                  >
-                    Spara affär
-                  </button>
-                  <button 
-                    onClick={() => setShowDealModal(false)}
-                    className="flex-1 bg-white border border-gray-200 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors"
-                  >
-                    Avbryt
-                  </button>
-                </div>
-              </div>
-            </div>
+            <DealModal 
+              isOpen={showDealModal}
+              onClose={() => setShowDealModal(false)}
+              onSave={handleSaveDeal} // Denna funktion skapade vi i förra steget
+              dealData={newDeal}
+              setDealData={setNewDeal}
+              phases={phases}
+              isEditing={!!editingDealId} // Gör om ID:t till en boolean (true om vi redigerar)
+            />
           )}
     </div> 
   );
