@@ -16,16 +16,16 @@ export default function Settings() {
   useEffect(() => { fetchPhases(); }, []);
 
   const fetchPhases = async () => {
-    const res = await axios.get(`${API_BASE_URL}/api/phases/`);
+    const res = await axios.get(`${API_BASE_URL}/api/deal-phases/`);
     setPhases(res.data.sort((a, b) => a.order - b.order));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editingId) {
-      await axios.put(`${API_BASE_URL}/api/phases/${editingId}/`, formData);
+      await axios.put(`${API_BASE_URL}/api/deal-phases/${editingId}/`, formData);
     } else {
-      await axios.post(`${API_BASE_URL}/api/phases/`, { ...formData, order: phases.length });
+      await axios.post(`${API_BASE_URL}/api/deal-phases/`, { ...formData, order: phases.length });
     }
     resetForm();
     fetchPhases();
@@ -43,7 +43,7 @@ export default function Settings() {
 
   const deletePhase = async (id) => {
     if (window.confirm("Ta bort fas?")) {
-      await axios.delete(`${API_BASE_URL}/api/phases/${id}/`);
+      await axios.delete(`${API_BASE_URL}/api/deal-phases/${id}/`);
       fetchPhases();
     }
   };
@@ -54,13 +54,13 @@ export default function Settings() {
       {/* --- RUBRIK --- */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Inställningar</h1>
-        <p className="text-gray-500">Hantera konfigurationen för ditt CRM</p>
+        <p className="text-gray-500">Inställningar för ditt CRM</p>
       </div>
 
       {/* --- FORMULÄR-RUTA --- */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h2 className="text-xl font-bold mb-4 text-gray-700">
-          {editingId ? 'Redigera fas' : 'Skapa ny fas'}
+          {editingId ? 'Redigera fas för deals' : 'Skapa ny fas för deals'}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,7 +105,7 @@ export default function Settings() {
               checked={formData.is_default}
               onChange={e => setFormData({...formData, is_default: e.target.checked})}
             />
-            <label htmlFor="is_default" className="text-sm font-medium text-gray-600 cursor-pointer">Sätt som standard för nya konton</label>
+            <label htmlFor="is_default" className="text-sm font-medium text-gray-600 cursor-pointer">Sätt som standard för nya deals</label>
           </div>
 
           <div className="flex gap-2 pt-2">

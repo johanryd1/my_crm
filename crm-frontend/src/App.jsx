@@ -24,6 +24,7 @@ function App() {
   const [phaseFilter, setPhaseFilter] = useState('all');
   const [selectedContact, setSelectedContact] = useState(null);
   const [isEditingContact, setIsEditingContact] = useState(false);
+  const [deals, setDeals] = useState([]);
   const [editContactData, setEditContactData] = useState({
   first_name: '',
   last_name: '',
@@ -44,6 +45,17 @@ function App() {
   const [activeTab, setActiveTab] = useState('contacts'); // 'contacts' eller 'activities'
 
 
+const fetchDeals = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/api/deals/', {
+      headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
+    });
+    const data = await response.json();
+    setDeals(data);
+  } catch (error) {
+    console.error("Fel vid hämtning av deals:", error);
+  }
+};
 
 const fetchContacts = async (accountId = null) => {
   try {
@@ -99,7 +111,7 @@ const fetchContacts = async (accountId = null) => {
   // Hämta faser från API
 const fetchPhases = async () => {
   try {
-    const res = await axios.get(`${API_BASE_URL}/api/phases/`);
+    const res = await axios.get(`${API_BASE_URL}/api/deal-phases/`);
     // Sortera efter 'order' så de kommer i rätt ordning
     setPhases(res.data.sort((a, b) => a.order - b.order));
   } catch (err) {
@@ -205,10 +217,10 @@ const handleAddContact = async (contactData) => {
   const filteredAccounts = accounts.filter(acc => {
     const matchesSearch = acc.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (phaseFilter === 'all') return matchesSearch;
+    return matchesSearch;
     
     // Vi jämför nu med ID:t
-    return matchesSearch && acc.phase === phaseFilter;
+    //return matchesSearch && acc.phase === phaseFilter;
   })
   .sort((a, b) => {
     // localeCompare('sv') ser till att Å, Ä, Ö hamnar rätt
@@ -507,7 +519,7 @@ return (
                           </span>
                           
                           {/* FAS-ETIKETT DYNAMISK */}
-                          {acc.phase_details ? (
+                          {/*{acc.phase_details ? (
                             <span 
                               className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
                               style={{ backgroundColor: acc.phase_details.color || '#gray-400' }}
@@ -518,7 +530,7 @@ return (
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-400">
                               Ingen fas
                             </span>
-                          )}
+                          )}*/}
 
                         </div>
 
@@ -569,7 +581,7 @@ return (
                       <div className="flex items-center gap-2">🌐 <a href={selectedAccount.website} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">{selectedAccount.website || "Ingen webbplats"}</a></div>
                       
                       {/* VISNINGSLÄGE FÖR FAS I DETALJVY */}
-                      <div className="text-right">
+                      {/*<div className="text-right">
                         {selectedAccount.phase_details ? (
                           <div className="flex flex-col items-end">
                             
@@ -591,7 +603,7 @@ return (
                             </span>
                           </div>
                         )}
-                      </div>
+                      </div>*/}
 
                     </div>
                   ) : (
@@ -599,7 +611,7 @@ return (
                       <input className="border p-2 rounded text-sm" value={editAccount.address || ''} onChange={e => setEditAccount({...editAccount, address: e.target.value})} placeholder="Adress" />
                       <input className="border p-2 rounded text-sm" value={editAccount.phone || ''} onChange={e => setEditAccount({...editAccount, phone: e.target.value})} placeholder="Telefon" />
                       <input className="border p-2 rounded text-sm" value={editAccount.website || ''} onChange={e => setEditAccount({...editAccount, website: e.target.value})} placeholder="Webbplats" />
-                      <select 
+                      {/*<select 
                         className="border p-2 rounded text-sm w-full"
                         value={editAccount.phase || ""} 
                         onChange={e => setEditAccount({...editAccount, phase: e.target.value})}
@@ -610,7 +622,7 @@ return (
                             {p.name}
                           </option>
                         ))}
-                      </select>
+                      </select>*/}
                     </div>
                   )}
                 </div>

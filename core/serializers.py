@@ -14,12 +14,6 @@ class DealPhaseSerializer(serializers.ModelSerializer):
         model = DealPhase
         fields = '__all__'
 
-class AccountSerializer(serializers.ModelSerializer):
-    contacts = ContactSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Account
-        fields = ['id', 'name', 'website', 'industry', 'contacts', 'address', 'phone', 'phase', 'phase_details']
 
 class DealSerializer(serializers.ModelSerializer):
     # 'stage_details' används för att visa information (read_only)
@@ -47,6 +41,14 @@ class DealSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['value'] = float(instance.value)
         return representation
+
+class AccountSerializer(serializers.ModelSerializer):
+    contacts = ContactSerializer(many=True, read_only=True)
+    deals = DealSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Account
+        fields = ['id', 'name', 'website', 'industry', 'contacts', 'address', 'phone', 'deals']
 
 class DealSerializer(serializers.ModelSerializer):
     phase_details = DealPhaseSerializer(source='stage', read_only=True)
