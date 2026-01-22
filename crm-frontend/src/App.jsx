@@ -452,8 +452,7 @@ const handleAddContact = async (contactData) => {
         role: contact.role || ''
       });
 
-      // Öppna modalen!
-      //setShowContactModal(true);
+      //setIsEditingContact(true);
     };
 
   // --- RENDERING ---
@@ -893,7 +892,7 @@ return (
         )}
 
       </div> 
-{/*         <ContactModal 
+        <ContactModal 
               contact={selectedContact}
               activities={activities}
               onClose={() => { setSelectedContact(null); setIsEditingContact(false); }}
@@ -905,7 +904,7 @@ return (
               onDelete={deleteContact}
               onUpdateStatus={handleUpdateStatus}
               onDeleteActivity={deleteActivity}
-            /> */}
+            />
 
 
             {showDealModal && (
