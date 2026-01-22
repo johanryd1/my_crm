@@ -92,3 +92,21 @@ export const ActivityIcon = ({ size = 24, color = "currentColor" }) => (
     <polyline points="12 6 12 12 16 14" />
   </svg>
 );
+
+export const DollarSign = ({ size = 24, color = 'currentColor', ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M12 2v22" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+);

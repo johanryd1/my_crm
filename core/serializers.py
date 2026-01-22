@@ -42,20 +42,21 @@ class DealSerializer(serializers.ModelSerializer):
         representation['value'] = float(instance.value)
         return representation
 
+
+class DealSerializer(serializers.ModelSerializer):
+    # phase_details = DealPhaseSerializer(source='stage', read_only=True)
+
+    class Meta:
+        model = Deal
+        fields = ['id', 'name', 'value', 'stage', 'account']
+
 class AccountSerializer(serializers.ModelSerializer):
     contacts = ContactSerializer(many=True, read_only=True)
     deals = DealSerializer(many=True, read_only=True)
 
     class Meta:
         model = Account
-        fields = ['id', 'name', 'website', 'industry', 'contacts', 'address', 'phone', 'deals']
-
-class DealSerializer(serializers.ModelSerializer):
-    phase_details = DealPhaseSerializer(source='stage', read_only=True)
-
-    class Meta:
-        model = Deal
-        fields = ['id', 'name', 'website', 'industry', 'contacts', 'address', 'phone', 'phase', 'phase_details']
+        fields = ['id', 'name', 'website', 'industry', 'contacts', 'address', 'phone', 'deals', 'created_at']
 
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:

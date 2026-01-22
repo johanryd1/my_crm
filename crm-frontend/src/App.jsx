@@ -8,7 +8,8 @@ import ContactList from './components/ContactList';
 import ContactForm from './components/ContactForm';
 import Settings from './components/Settings';
 import PeopleView from './components/PeopleView';
-import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon, CRMIcon, ActivityIcon } from './components/Icons';
+import Deals from './components/Deals';
+import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon, CRMIcon, ActivityIcon, DollarSign } from './components/Icons';
 import API_BASE_URL from './api'; // Importera din nya konfiguration
 
 function App() {
@@ -42,8 +43,41 @@ function App() {
   });
     const [searchTerm, setSearchTerm] = useState('')
 
-  const [activeTab, setActiveTab] = useState('contacts'); // 'contacts' eller 'activities'
+  const [activeTab, setActiveTab] = useState('deals'); // 'contacts' eller 'activities'
 
+const [showDealModal, setShowDealModal] = useState(false);
+const [newDeal, setNewDeal] = useState({
+  name: '',
+  value: '',
+  stage: phases[0]?.id || '' // Sätter första tillgängliga fas som förval
+});
+
+
+const handleCreateDeal = async () => {
+  try {
+    const payload = {
+      ...newDeal,
+      account: selectedAccount.id // Kopplar affären till rätt konto
+    };
+
+    const res = await axios.post(`${API_BASE_URL}/api/deals/`, payload, {
+      headers: { Authorization: `Token ${localStorage.getItem('token')}` }
+    });
+
+    // Uppdatera lokalt state så att affären syns direkt
+    const updatedAccount = {
+      ...selectedAccount,
+      deals: [...(selectedAccount.deals || []), res.data]
+    };
+    
+    setSelectedAccount(updatedAccount); // Uppdaterar vyn
+    setShowDealModal(false); // Stäng modalen
+    setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' }); // Nollställ
+  } catch (err) {
+    console.error("Kunde inte skapa affär:", err);
+    alert("Något gick fel när affären skulle sparas.");
+  }
+};
 
 const fetchDeals = async () => {
   try {
@@ -353,7 +387,9 @@ const handleAddContact = async (contactData) => {
       //setIsEditingContact(true);
     };
 
-
+// I App.jsx
+console.log("Faser i App.jsx:", phases);
+console.log("Valt konto i App.jsx:", selectedAccount);
   // --- RENDERING ---
 return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 flex justify-center font-sans">
@@ -455,9 +491,10 @@ return (
                   />
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-6">
+                {/* Ta bort fasknapparna */}
+                {/* <div className="flex flex-wrap gap-2 mb-6"> */}
                   {/* "Alla"-knappen finns alltid kvar */}
-                  <button
+                  {/* <button
                     onClick={() => setPhaseFilter('all')}
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                       phaseFilter === 'all' 
@@ -466,10 +503,10 @@ return (
                     }`}
                   >
                     Alla
-                  </button>
+                  </button> */}
 
                   {/* Dynamiska knappar från dina inställningar */}
-                  {phases.map((p) => (
+                 {/*  {phases.map((p) => (
                     <button
                       key={p.id}
                       onClick={() => setPhaseFilter(p.id)}
@@ -485,7 +522,7 @@ return (
                     </button>
                   ))}
                 
-                </div>
+                </div> */}
 
                 <div className="bg-white p-6 rounded-lg shadow-md mb-8">
                   <form onSubmit={handleSubmit} className="flex gap-4">
@@ -553,82 +590,179 @@ return (
                   ← Tillbaka till listan
                 </button>
                 
-                <div className="bg-white rounded-xl shadow-md p-6 mb-8 border-t-4 border-blue-600">
-                  <div className="flex justify-between items-start mb-4">
-                    <h1 className="text-4xl font-bold text-gray-800">{selectedAccount.name}</h1>
+                <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border-t-8 border-blue-600">
+                  {/* Header-sektion */}
+                  <div className="flex justify-between items-start mb-8">
+                    <div className="flex items-center gap-4">
+                      <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
+                        {selectedAccount.name}
+                      </h1>
+                      <span className="text-sm text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded-full border border-gray-100 mt-1">
+                        Skapat {selectedAccount.created_at ? new Date(selectedAccount.created_at).toLocaleDateString('sv-SE') : 'Okänt datum'}
+                      </span>
+                    </div>
+
                     {!isEditing ? (
                       <button 
                         onClick={() => {
                           setIsEditing(true);
                           setEditAccount(selectedAccount);
                         }}
-                        className="text-blue-600 hover:text-blue-800 font-semibold text-sm flex items-center gap-1"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-bold text-sm transition-all shadow-sm"
                       >
                         ✎ Redigera info
                       </button>
                     ) : (
-                      <div className="flex gap-2">
-                        <button onClick={handleUpdateAccount} className="bg-green-600 text-white px-4 py-1 rounded text-sm font-bold">Spara</button>
-                        <button onClick={() => setIsEditing(false)} className="bg-gray-200 text-gray-700 px-4 py-1 rounded text-sm">Avbryt</button>
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={handleUpdateAccount} 
+                          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors"
+                        >
+                          Spara ändringar
+                        </button>
+                        <button 
+                          onClick={() => setIsEditing(false)} 
+                          className="bg-white border border-gray-300 text-gray-600 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                        >
+                          Avbryt
+                        </button>
                       </div>
                     )}
                   </div>
 
                   {!isEditing ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-gray-600">
-                      <div className="flex items-center gap-2">📍 {selectedAccount.address || "Ingen adress"}</div>
-                      <div className="flex items-center gap-2">📞 {selectedAccount.phone || "Inget nummer"}</div>
-                      <div className="flex items-center gap-2">🌐 <a href={selectedAccount.website} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">{selectedAccount.website || "Ingen webbplats"}</a></div>
+                    /* VISNINGSLÄGE - Nu med 2 bredare kolumner */
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-16">
                       
-                      {/* VISNINGSLÄGE FÖR FAS I DETALJVY */}
-                      {/*<div className="text-right">
-                        {selectedAccount.phase_details ? (
-                          <div className="flex flex-col items-end">
-                            
-                            <span 
-                              className="px-4 py-1.5 rounded-full font-bold text-xs text-white shadow-sm transition-all"
-                              style={{ 
-                                backgroundColor: selectedAccount.phase_details.color,
-                                boxShadow: `0 2px 8px ${selectedAccount.phase_details.color}44` 
-                              }}
-                            >
-                              {selectedAccount.phase_details.name}
-                            </span>
+                      {/* Vänster kolumn: Plats & Bransch */}
+                      <div className="space-y-6">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Adress</label>
+                          <div className="flex items-start gap-3 text-gray-700">
+                            <span className="text-xl">📍</span>
+                            <div className="leading-relaxed text-lg">
+                              {selectedAccount.address ? (
+                                selectedAccount.address.split(',').map((line, i) => (
+                                  <div key={i} className={i === 0 ? "font-medium text-gray-900" : ""}>{line.trim()}</div>
+                                ))
+                              ) : (
+                                <span className="text-gray-400 italic">Ingen adress angiven</span>
+                              )}
+                            </div>
                           </div>
-                        ) : (
-                          <div className="flex flex-col items-end">
-                            
-                            <span className="px-4 py-1.5 rounded-full font-bold text-xs bg-gray-100 text-gray-400 border border-gray-200">
-                              Ej angiven
-                            </span>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Bransch</label>
+                          <div className="flex items-center gap-3 text-gray-700">
+                            <span className="text-xl">🏢</span>
+                            <span className="text-lg">{selectedAccount.industry || <span className="text-gray-400 italic">Ej angivet</span>}</span>
                           </div>
-                        )}
-                      </div>*/}
+                        </div>
+                      </div>
 
+                      {/* Höger kolumn: Kontaktuppgifter */}
+                      <div className="space-y-6">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Telefonnummer</label>
+                          <div className="flex items-center gap-3 text-gray-700">
+                            <span className="text-xl">📞</span>
+                            <span className="text-lg">
+                              {selectedAccount.phone ? (
+                                <a href={`tel:${selectedAccount.phone}`} className="hover:text-blue-600 transition-colors">{selectedAccount.phone}</a>
+                              ) : (
+                                <span className="text-gray-400 italic">Inget nummer</span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Webbplats</label>
+                          <div className="flex items-center gap-3 text-gray-700">
+                            <span className="text-xl">🌐</span>
+                            <span className="text-lg">
+                              {selectedAccount.website ? (
+                                <a href={selectedAccount.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-medium">
+                                  {selectedAccount.website.replace(/^https?:\/\//, '')}
+                                </a>
+                              ) : (
+                                <span className="text-gray-400 italic">Ingen webbplats</span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <input className="border p-2 rounded text-sm" value={editAccount.address || ''} onChange={e => setEditAccount({...editAccount, address: e.target.value})} placeholder="Adress" />
-                      <input className="border p-2 rounded text-sm" value={editAccount.phone || ''} onChange={e => setEditAccount({...editAccount, phone: e.target.value})} placeholder="Telefon" />
-                      <input className="border p-2 rounded text-sm" value={editAccount.website || ''} onChange={e => setEditAccount({...editAccount, website: e.target.value})} placeholder="Webbplats" />
-                      {/*<select 
-                        className="border p-2 rounded text-sm w-full"
-                        value={editAccount.phase || ""} 
-                        onChange={e => setEditAccount({...editAccount, phase: e.target.value})}
-                      >
-                        <option value="">Välj fas...</option>
-                        {phases.map(p => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>*/}
+                    /* REDIGERINGSLÄGE */
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50 p-6 rounded-xl border border-dashed border-gray-300">
+                      <div className="space-y-5">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1 ml-1">Adress (Använd komma för radbrytning)</label>
+                          <input 
+                            className="w-full border-gray-300 border p-3 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
+                            value={editAccount.address || ''} 
+                            onChange={e => setEditAccount({...editAccount, address: e.target.value})} 
+                            placeholder="Ex: Storgatan 1, 123 45 Stockholm" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1 ml-1">Bransch</label>
+                          <input 
+                            className="w-full border-gray-300 border p-3 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
+                            value={editAccount.industry || ''} 
+                            onChange={e => setEditAccount({...editAccount, industry: e.target.value})} 
+                            placeholder="T.ex. Fastigheter eller IT" 
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-5">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1 ml-1">Telefon</label>
+                          <input 
+                            className="w-full border-gray-300 border p-3 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
+                            value={editAccount.phone || ''} 
+                            onChange={e => setEditAccount({...editAccount, phone: e.target.value})} 
+                            placeholder="08-123 456 00" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1 ml-1">Webbplats</label>
+                          <input 
+                            className="w-full border-gray-300 border p-3 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
+                            value={editAccount.website || ''} 
+                            onChange={e => setEditAccount({...editAccount, website: e.target.value})} 
+                            placeholder="https://www.foretaget.se" 
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
 
                 {/* Flik-navigering */}
                 <div className="flex space-x-2 border-b border-gray-200 mb-6 bg-gray-50/50 p-1 rounded-t-lg">
+                  
+                  {/* NY TABB: Affärer (Deals) */}
+                  <button
+                    onClick={() => setActiveTab('deals')}
+                    className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      activeTab === 'deals' 
+                      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                    }`}
+                  >
+                    {/* Byt ut DollarSign mot den ikon du har importerat, t.ex. Briefcase eller TrendingUp */}
+                    <DollarSign size={18} color={activeTab === 'deals' ? "#2563eb" : "#6b7280"} />
+                    <span>Affärer</span>
+                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'deals' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+                      {selectedAccount.deals?.length || 0}
+                    </span>
+                  </button>
+
+                  {/* Befintlig: Kontakter */}
                   <button
                     onClick={() => setActiveTab('contacts')}
                     className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
@@ -639,12 +773,12 @@ return (
                   >
                     <CRMIcon size={18} color={activeTab === 'contacts' ? "#2563eb" : "#6b7280"} />
                     <span>Kontakter</span>
-                    {/* Bonus: En liten badge som visar antal */}
                     <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'contacts' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
                       {contacts.length}
                     </span>
                   </button>
 
+                  {/* Befintlig: Aktivitetslogg */}
                   <button
                     onClick={() => setActiveTab('activities')}
                     className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
@@ -696,6 +830,14 @@ return (
                       </div>
                     </div>
                   )}
+
+                  {activeTab === 'deals' && (
+                    <Deals 
+                      selectedAccount={selectedAccount} 
+                      dealPhases={phases} 
+                      onAddDeal={() => setShowDealModal(true)} // Skicka med funktionen som prop
+                    />
+                  )}
                 </div>
               </div> /* Slut Vy 2 */
             )}
@@ -730,6 +872,71 @@ return (
               onUpdateStatus={handleUpdateStatus}
               onDeleteActivity={deleteActivity}
             />
+
+
+            {showDealModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                <div className="p-6 border-b border-gray-100">
+                  <h2 className="text-xl font-bold text-gray-900">Skapa ny affärsmöjlighet</h2>
+                  <p className="text-sm text-gray-500">Lägg till detaljer för den nya affären på {selectedAccount.name}</p>
+                </div>
+                
+                <div className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Affärens namn</label>
+                    <input 
+                      type="text"
+                      className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                      placeholder="t.ex. Årslicens 2024"
+                      value={newDeal.name}
+                      onChange={e => setNewDeal({...newDeal, name: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Värde (SEK)</label>
+                      <input 
+                        type="number"
+                        className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="0"
+                        value={newDeal.value}
+                        onChange={e => setNewDeal({...newDeal, value: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Fas</label>
+                      <select 
+                        className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                        value={newDeal.stage}
+                        onChange={e => setNewDeal({...newDeal, stage: e.target.value})}
+                      >
+                        {phases.map(phase => (
+                          <option key={phase.id} value={phase.id}>{phase.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gray-50 flex gap-3">
+                  <button 
+                    onClick={handleCreateDeal}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-200"
+                  >
+                    Spara affär
+                  </button>
+                  <button 
+                    onClick={() => setShowDealModal(false)}
+                    className="flex-1 bg-white border border-gray-200 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors"
+                  >
+                    Avbryt
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
     </div> 
   );
 
