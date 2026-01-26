@@ -10,6 +10,7 @@ import Settings from './components/Settings';
 import PeopleView from './components/PeopleView';
 import Deals from './components/Deals';
 import DealModal from './components/DealModal';
+import PipelineView from './components/PipelineView'; 
 import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon, CRMIcon, ActivityIcon, DollarSign } from './components/Icons';
 import API_BASE_URL from './api'; // Importera din nya konfiguration
 
@@ -53,6 +54,46 @@ const [newDeal, setNewDeal] = useState({
   value: '',
   stage: phases[0]?.id || '' // Sätter första tillgängliga fas som förval
 });
+
+
+const handleUpdateDealPhase = async (dealId, newPhaseId) => {
+  console.log(`Flyttar deal ${dealId} till fas ${newPhaseId}`);
+
+  // 1. Skapa en kopia av accounts där vi flyttat dealen (Optimistic UI)
+  const updatedAccounts = accounts.map(acc => {
+    return {
+      ...acc,
+      // Mappa igenom dealsen i varje konto
+      deals: acc.deals?.map(d => {
+        if (d.id.toString() === dealId.toString()) {
+          return { ...d, stage: parseInt(newPhaseId) }; // Uppdatera fasen
+        }
+        return d;
+      })
+    };
+  });
+
+  // 2. Uppdatera statet direkt så kortet "fastnar" i nya kolumnen
+  setAccounts(updatedAccounts);
+
+  // 3. Skicka ändringen till databasen (Supabase/Django)
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/deals/${dealId}/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stage: parseInt(newPhaseId) })
+    });
+
+    if (!response.ok) {
+      throw new Error("Kunde inte spara i databasen");
+    }
+    console.log("Fas uppdaterad i databasen!");
+  } catch (err) {
+    console.error("Fel vid uppdatering:", err);
+    // Om det skiter sig, hämta om datan för att återställa korrekt läge
+    fetchAccounts(); 
+  }
+};
 
 // För att skapa NY
 const openCreateDealModal = () => {
@@ -488,6 +529,15 @@ return (
               >
                 Konton
               </button>
+              {/* NY TABB */}
+              <button 
+                onClick={() => { setView('pipeline'); setSelectedAccount(null); }}
+                className={`px-8 py-2 rounded-xl text-sm font-bold transition-all ${
+                  view === 'pipeline' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                Affärer
+              </button>
               <button 
                 onClick={() => { setView('people'); setSelectedAccount(null); }}
                 className={`px-8 py-2 rounded-xl text-sm font-bold transition-all ${
@@ -520,7 +570,17 @@ return (
         {/* VY 1: INSTÄLLNINGAR */}
         {view === 'settings' && <Settings />}
 
-        {/* VY 2: PERSONER */}
+        {/* VY 2: PIPELINE */}
+        {view === 'pipeline' && (
+          <PipelineView 
+            phases={phases} 
+            accounts={accounts} 
+            onEditDeal={openEditDealModal} 
+            onUpdateDealPhase={handleUpdateDealPhase} // VIKTIG: Denna rad måste med!
+          />
+        )}
+
+        {/* VY 3: PERSONER */}
         {view === 'people' && (
           <PeopleView 
             people={contacts} 
@@ -528,7 +588,7 @@ return (
           />
         )}
 
-        {/* VY 3: DASHBOARD (FÖRETAG) */}
+        {/* VY 4: DASHBOARD (FÖRETAG) */}
         {view === 'dashboard' && (
         
           <> {/* Start Dashboard Fragment */}
@@ -542,7 +602,7 @@ return (
                   
                   {/* Antals-badge som matchar PeopleView */}
                   <span className="text-sm text-gray-500 font-medium bg-white px-4 py-1.5 rounded-full shadow-sm border border-gray-100">
-                    {filteredAccounts.length} {filteredAccounts.length === 1 ? 'företag' : 'företag'}
+                    {filteredAccounts.length} {filteredAccounts.length === 1 ? 'konto' : 'konton'}
                   </span>
                 </div>
 
@@ -571,47 +631,47 @@ return (
                   </form>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   <ul className="divide-y divide-gray-200">
-                    {filteredAccounts.map((acc) => (
-                      <li key={acc.id} className="px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition">
-                        <div className="flex items-center gap-4 flex-1">
-                          <span 
-                            className="font-medium text-blue-600 cursor-pointer hover:underline"
-                            onClick={() => {
-                              setSelectedAccount(acc);
-                              fetchContacts(acc.id);
-                              fetchActivities(acc.id);
-                            }}
-                          >
-                            {acc.name}
-                          </span>
-                          
-                          {/* FAS-ETIKETT DYNAMISK */}
-                          {/*{acc.phase_details ? (
-                            <span 
-                              className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
-                              style={{ backgroundColor: acc.phase_details.color || '#gray-400' }}
+                    {filteredAccounts.map((acc) => {
+                      const dealCount = acc.deals ? acc.deals.length : 0;
+
+                      return (
+                        <li key={acc.id} className="px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-all group">
+                          <div className="flex items-center gap-4 flex-1">
+                            <div className="flex items-center gap-3"> {/* Rad för namn och badge */}
+                              <span 
+                                className="font-bold text-gray-900 cursor-pointer hover:text-blue-600 hover:underline transition-colors"
+                                onClick={() => {
+                                  setSelectedAccount(acc);
+                                  fetchContacts(acc.id);
+                                  fetchActivities(acc.id);
+                                }}
+                              >
+                                {acc.name}
+                              </span>
+                              
+                              {/* Badge direkt efter namnet */}
+                              {dealCount > 0 && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                                  {dealCount} {dealCount === 1 ? 'affär' : 'affärer'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center">
+                            <button 
+                              onClick={() => deleteAccount(acc.id)}
+                              className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                              title="Ta bort konto"
                             >
-                              {acc.phase_details.name}
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-400">
-                              Ingen fas
-                            </span>
-                          )}*/}
-
-                        </div>
-
-                        <button 
-                          onClick={() => deleteAccount(acc.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                          title="Ta bort konto"
-                        >
-                          <IconTrash className="w-5 h-5" />
-                        </button>
-                      </li>
-                    ))}
+                              <IconTrash className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </div>

@@ -60,7 +60,7 @@ export default function Settings() {
       {/* --- FORMULÄR-RUTA --- */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h2 className="text-xl font-bold mb-4 text-gray-700">
-          {editingId ? 'Redigera fas för deals' : 'Skapa ny fas för deals'}
+          {editingId ? 'Redigera fas för affärer' : 'Skapa ny fas för affärer'}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
