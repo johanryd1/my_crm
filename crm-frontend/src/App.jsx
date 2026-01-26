@@ -97,19 +97,21 @@ const handleUpdateDealPhase = async (dealId, newPhaseId) => {
 
 // För att skapa NY
 const openCreateDealModal = () => {
-  setEditingDealId(null); // Viktigt: nollställ ID
-  setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' });
+  setEditingDealId(null); // Viktigt för att isEditing ska bli false
+  setNewDeal({ 
+    name: '', 
+    value: '', 
+    stage: phases[0]?.id || '' 
+  });
   setShowDealModal(true);
 };
 
 // För att REDIGERA
 const openEditDealModal = (deal) => {
-  setEditingDealId(deal.id); // Sätt ID för den deal som ska ändras
-  setNewDeal({ 
-    name: deal.name, 
-    value: deal.value, 
-    stage: deal.stage 
-  });
+  setEditingDealId(deal.id);
+  // Genom att sätta hela deal-objektet här får vi med 'account'-id:t 
+  // som vi precis lade till i steg 1 ovan.
+  setNewDeal(deal); 
   setShowDealModal(true);
 };
 
@@ -170,51 +172,78 @@ const fetchContacts = async (accountId = null) => {
 
 const handleSaveDeal = async () => {
   try {
-    // 1. Förbered datan. Vi kopplar affären till det konto som är öppet.
+    // 1. Identifiera vilket konto affären tillhör.
+    // Om vi är i Pipeline-vyn finns kontot redan på newDeal.account.
+    // Om vi är inne på ett specifikt konto tar vi det från selectedAccount.
+    const accountId = selectedAccount ? selectedAccount.id : newDeal.account;
+
+    if (!accountId) {
+      alert("Kunde inte hitta vilket konto affären tillhör.");
+      return;
+    }
+
     const payload = { 
       ...newDeal, 
-      account: selectedAccount.id 
+      account: accountId,
+      stage: parseInt(newDeal.stage || phases[0]?.id),
+      value: parseFloat(newDeal.value) || 0
     };
 
     let response;
+    const config = { 
+      headers: { Authorization: `Token ${localStorage.getItem('token')}` } 
+    };
 
     if (editingDealId) {
-      // 2. UPPDATERA (PUT)
       response = await axios.put(
         `${API_BASE_URL}/api/deals/${editingDealId}/`, 
         payload, 
-        { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
+        config
       );
 
-      // Uppdatera selectedAccount lokalt så vi slipper ladda om hela sidan
-      const updatedDeals = selectedAccount.deals.map(d => 
-        d.id === editingDealId ? response.data : d
-      );
-      setSelectedAccount({ ...selectedAccount, deals: updatedDeals });
+      // Uppdatera selectedAccount lokalt om det finns öppet
+      if (selectedAccount && selectedAccount.id === accountId) {
+        const updatedDeals = selectedAccount.deals.map(d => 
+          d.id === editingDealId ? response.data : d
+        );
+        setSelectedAccount({ ...selectedAccount, deals: updatedDeals });
+      }
       
     } else {
-      // 3. SKAPA NY (POST)
       response = await axios.post(
         `${API_BASE_URL}/api/deals/`, 
         payload, 
-        { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
+        config
       );
 
-      // Lägg till den nya affären i listan lokalt
-      setSelectedAccount({ 
-        ...selectedAccount, 
-        deals: [...(selectedAccount.deals || []), response.data] 
-      });
+      // Lägg till lokalt i selectedAccount om det är öppet
+      if (selectedAccount && selectedAccount.id === accountId) {
+        setSelectedAccount({ 
+          ...selectedAccount, 
+          deals: [...(selectedAccount.deals || []), response.data] 
+        });
+      }
     }
 
-    // 4. Stäng modalen och nollställ state
+    // 2. Uppdatera den globala accounts-listan (Viktigt för Pipeline-vyn!)
+    setAccounts(prevAccounts => prevAccounts.map(acc => {
+      if (acc.id === accountId) {
+        const currentDeals = editingDealId 
+          ? acc.deals.map(d => d.id === editingDealId ? response.data : d)
+          : [...(acc.deals || []), response.data];
+        return { ...acc, deals: currentDeals };
+      }
+      return acc;
+    }));
+
     setShowDealModal(false);
     setEditingDealId(null);
     setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' });
 
   } catch (err) {
     console.error("Kunde inte spara affären:", err);
-    alert("Något gick fel när affären skulle sparas. Kontrollera att alla fält är rätt ifyllda.");
+    const errorMsg = err.response?.data ? JSON.stringify(err.response.data) : "Kontrollera fälten.";
+    alert("Något gick fel: " + errorMsg);
   }
 };
 
@@ -306,6 +335,52 @@ const deleteActivity = async (activityId) => {
     alert("Ett fel uppstod när aktiviteten skulle raderas.");
   }
 };  
+
+const handleDeleteDeal = async () => {
+  if (!editingDealId) return;
+
+  try {
+    // 1. Identifiera vilket konto dealen tillhör innan vi tar bort den
+    // Vi kollar först i selectedAccount, annars i newDeal
+    const accountId = selectedAccount ? selectedAccount.id : newDeal.account;
+
+    if (!accountId) {
+      alert("Kunde inte identifiera vilket konto affären tillhör.");
+      return;
+    }
+
+    await axios.delete(
+      `${API_BASE_URL}/api/deals/${editingDealId}/`, 
+      { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
+    );
+
+    // 2. Uppdatera selectedAccount lokalt (OM det är det kontot som är öppet)
+    if (selectedAccount && selectedAccount.id === accountId) {
+      const updatedSelectedDeals = selectedAccount.deals.filter(d => d.id !== editingDealId);
+      setSelectedAccount({ ...selectedAccount, deals: updatedSelectedDeals });
+    }
+
+    // 3. Uppdatera den globala accounts-listan (VIKTIGT för Pipeline-vyn)
+    setAccounts(prevAccounts => prevAccounts.map(acc => {
+      if (acc.id === accountId) {
+        return { 
+          ...acc, 
+          deals: (acc.deals || []).filter(d => d.id !== editingDealId) 
+        };
+      }
+      return acc;
+    }));
+
+    // 4. Stäng modalen och nollställ
+    setShowDealModal(false);
+    setEditingDealId(null);
+    setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' });
+
+  } catch (err) {
+    console.error("Kunde inte ta bort affären:", err);
+    alert("Det gick inte att ta bort affären. Prova igen.");
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -522,7 +597,12 @@ return (
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <div className="bg-white border border-gray-100 p-1 rounded-2xl shadow-sm flex gap-1">
               <button 
-                onClick={() => { setView('dashboard'); setSelectedAccount(null); }}
+                onClick={() => { 
+                  setView('dashboard'); 
+                  setSelectedAccount(null); 
+                  setEditingDealId(null); // Nollställer valt deal-ID
+                  setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' }); // Rensar deal-datan
+                }}
                 className={`px-8 py-2 rounded-xl text-sm font-bold transition-all ${
                   view === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
                 }`}
@@ -531,7 +611,12 @@ return (
               </button>
               {/* NY TABB */}
               <button 
-                onClick={() => { setView('pipeline'); setSelectedAccount(null); }}
+                onClick={() => { 
+                  setView('pipeline'); 
+                  setSelectedAccount(null); 
+                  setEditingDealId(null); // Nollställer valt deal-ID
+                  setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' }); // Rensar deal-datan
+                }}
                 className={`px-8 py-2 rounded-xl text-sm font-bold transition-all ${
                   view === 'pipeline' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
                 }`}
@@ -539,7 +624,12 @@ return (
                 Affärer
               </button>
               <button 
-                onClick={() => { setView('people'); setSelectedAccount(null); }}
+                onClick={() => { 
+                  setView('people'); 
+                  setSelectedAccount(null); 
+                  setEditingDealId(null); // Nollställer valt deal-ID
+                  setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' }); // Rensar deal-datan
+                }}
                 className={`px-8 py-2 rounded-xl text-sm font-bold transition-all ${
                   view === 'people' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
                 }`}
@@ -972,6 +1062,7 @@ return (
               isOpen={showDealModal}
               onClose={() => setShowDealModal(false)}
               onSave={handleSaveDeal} // Denna funktion skapade vi i förra steget
+              onDelete={handleDeleteDeal}
               dealData={newDeal}
               setDealData={setNewDeal}
               phases={phases}

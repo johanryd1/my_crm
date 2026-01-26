@@ -100,9 +100,14 @@ const PipelineView = ({ phases, accounts, onEditDeal, onUpdateDealPhase }) => {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  const allDeals = accounts.flatMap(acc => 
-    (acc.deals || []).map(deal => ({ ...deal, accountName: acc.name }))
-  );
+
+const allDeals = accounts.flatMap(acc => 
+  (acc.deals || []).map(deal => ({ 
+    ...deal, 
+    accountName: acc.name,
+    account: acc.id // LÄGG TILL DENNA RAD!
+  }))
+);
 
   const handleDragStart = (event) => {
     const { active } = event;
