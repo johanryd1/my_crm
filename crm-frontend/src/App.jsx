@@ -207,7 +207,7 @@ const handleSaveDeal = async () => {
 
       setAccounts(res.data)
     } catch (err) {
-      console.error("Kunde inte hämta prospekt:", err)
+      console.error("Kunde inte hämta konton:", err)
     }
   }
 
@@ -282,13 +282,13 @@ const deleteActivity = async (activityId) => {
       setNewName('')
       fetchAccounts()
     } catch (err) {
-      console.error("Kunde inte spara prospekt:", err)
+      console.error("Kunde inte spara konton:", err)
     }
   }
 
   // Radera företag
   const deleteAccount = async (id) => {
-    if (!window.confirm("Vill du verkligen ta bort detta prospekt?")) return
+    if (!window.confirm("Vill du verkligen ta bort detta konto?")) return
     try {
       await axios.delete(`${API_BASE_URL}/api/accounts/${id}/`)
       fetchAccounts()
@@ -486,7 +486,7 @@ return (
                   view === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
                 }`}
               >
-                Dashboard
+                Konton
               </button>
               <button 
                 onClick={() => { setView('people'); setSelectedAccount(null); }}
@@ -538,7 +538,7 @@ return (
   
                 {/* Header med rubrik och antal */}
                 <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-3xl font-bold text-gray-800">Mina prospekt</h1>
+                  <h1 className="text-3xl font-bold text-gray-800">Mina konton</h1>
                   
                   {/* Antals-badge som matchar PeopleView */}
                   <span className="text-sm text-gray-500 font-medium bg-white px-4 py-1.5 rounded-full shadow-sm border border-gray-100">
@@ -549,7 +549,7 @@ return (
                 <div className="mb-6">
                   <input 
                     type="text"
-                    placeholder="Sök bland prospekt..."
+                    placeholder="Sök bland konton..."
                     className="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -562,7 +562,7 @@ return (
                       type="text"
                       value={newName} 
                       onChange={(e) => setNewName(e.target.value)}
-                      placeholder="Nytt prospekt..."
+                      placeholder="Nytt konto..."
                       className="flex-1 border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                     <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition">
@@ -606,7 +606,7 @@ return (
                         <button 
                           onClick={() => deleteAccount(acc.id)}
                           className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                          title="Ta bort företag"
+                          title="Ta bort konto"
                         >
                           <IconTrash className="w-5 h-5" />
                         </button>
@@ -619,7 +619,7 @@ return (
               /* ================= VY 2: DETALJVY ================= */
               <div>
                 <button onClick={() => setSelectedAccount(null)} className="text-gray-600 mb-6 hover:text-black flex items-center gap-1 font-medium">
-                  ← Tillbaka till listan
+                  ← Tillbaka
                 </button>
                 
                 <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border-t-8 border-blue-600">
