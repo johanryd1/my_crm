@@ -250,24 +250,19 @@ const handleSaveDeal = async () => {
 
 // --- HÄMTA DATA VID START OCH VID VY-BYTE ---
     useEffect(() => {
-      // Nollställ val vid vy-byte
+    // Nollställ val vid vy-byte - MEN bara om vi inte går TILL dashboarden
+    // Det gör att onAccountClick kan sätta ett konto och sen byta vy utan att det rensas
+    if (view !== 'dashboard') {
       setSelectedAccount(null);
-      setSelectedContact(null); // Bra att nollställa även denna
-      setIsEditing(false);
+    }
+    
+    setSelectedContact(null);
+    setIsEditing(false);
 
-      // Hämta ALLTID kontakter så att PeopleView och listor fungerar
-      fetchContacts(); 
-      
-      // Hämta konton och faser (behövs oftast i alla vyer)
-      fetchAccounts();
-      fetchPhases();
-
-      // Om du vill vara specifik kan du behålla if-satser, 
-      // men det är säkrast att ladda kontakter direkt:
-      if (view === 'people') {
-        fetchContacts();
-      }
-    }, [view]);
+    fetchContacts(); 
+    fetchAccounts();
+    fetchPhases();
+  }, [view]);
 
   // --- FUNKTIONER ---
   
@@ -673,11 +668,31 @@ return (
 
         {/* VY 3: PERSONER */}
         {view === 'people' && (
-          <PeopleView 
-            people={contacts} 
-            onContactClick={handleSelectContact} 
-          />
-        )}
+        <PeopleView 
+          people={contacts} 
+          onContactClick={handleSelectContact} 
+          onAccountClick={(accountId) => {
+            const account = accounts.find(acc => Number(acc.id) === Number(accountId));
+            
+            if (account) {
+              console.log("Sätter selectedAccount till:", account.name);
+              
+              // 1. Sätt kontot först
+              setSelectedAccount(account);
+              
+              // 2. Om du har setSelectedAccountId (för sidomenyn), sätt det också
+              if (typeof setSelectedAccountId === 'function') {
+                setSelectedAccountId(account.id);
+              }
+
+              // 3. Byt vy sist
+              setView('dashboard');
+            } else {
+              console.warn("Kunde inte hitta konto med ID:", accountId);
+            }
+          }}
+        />
+      )}
 
         {/* VY 4: DASHBOARD (FÖRETAG) */}
         {view === 'dashboard' && (
