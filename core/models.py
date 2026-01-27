@@ -39,6 +39,7 @@ class Contact(models.Model):
 
 class Deal(models.Model):
     # Vi lägger till null=True på ALLA nya fält
+    documents = models.JSONField(default=list, blank=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='deals', null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     value = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

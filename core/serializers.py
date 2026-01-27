@@ -48,7 +48,7 @@ class DealSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Deal
-        fields = ['id', 'name', 'value', 'stage', 'account']
+        fields = ['id', 'name', 'value', 'stage', 'account', 'documents']
 
 class AccountSerializer(serializers.ModelSerializer):
     contacts = ContactSerializer(many=True, read_only=True)

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IconTrash } from './Icons'; 
 
 const DealModal = ({ 
@@ -11,7 +11,28 @@ const DealModal = ({
   phases, 
   isEditing 
 }) => {
+  // Lokalt state för att hantera inmatning av en ny länk innan den sparas
+  const [tempDocName, setTempDocName] = useState('');
+  const [tempDocUrl, setTempDocUrl] = useState('');
+
   if (!isOpen) return null;
+
+  const handleAddDocument = () => {
+    if (tempDocName && tempDocUrl) {
+      const newDoc = { name: tempDocName, url: tempDocUrl };
+      setDealData({
+        ...dealData,
+        documents: [...(dealData.documents || []), newDoc]
+      });
+      setTempDocName('');
+      setTempDocUrl('');
+    }
+  };
+
+  const handleRemoveDocument = (index) => {
+    const updatedDocs = dealData.documents.filter((_, i) => i !== index);
+    setDealData({ ...dealData, documents: updatedDocs });
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
@@ -27,7 +48,7 @@ const DealModal = ({
           </p>
         </div>
         
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Namn-fält */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Affärens namn</label>
@@ -46,11 +67,26 @@ const DealModal = ({
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Värde (SEK)</label>
               <input 
                 type="number"
+                step="1" // Hindrar decimalsteg
                 className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-900"
                 placeholder="0"
-                // Om värdet är 0 vid nyskapande, visa tomt så placeholder syns
-                value={dealData.value === 0 || dealData.value === '' ? '' : dealData.value}
-                onChange={e => setDealData({...dealData, value: e.target.value})}
+                // Vi använder Math.round för att ta bort .00-visning
+                value={
+                  dealData.value === 0 || dealData.value === '' 
+                  ? '' 
+                  : Math.round(dealData.value)
+                }
+                onChange={e => {
+                  // Vi parsar till Int direkt för att rensa bort ev. decimaler användaren skriver
+                  const val = e.target.value === '' ? '' : parseInt(e.target.value);
+                  setDealData({...dealData, value: val});
+                }}
+                // Förhindrar att användaren skriver in tecken som punkt eller komma
+                onKeyDown={(e) => {
+                  if (e.key === '.' || e.key === ',') {
+                    e.preventDefault();
+                  }
+                }}
               />
             </div>
 
@@ -66,6 +102,59 @@ const DealModal = ({
                   <option key={phase.id} value={phase.id}>{phase.name}</option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          {/* DOKUMENT-SEKTION */}
+          <div className="pt-4 border-t border-gray-100 space-y-3">
+            <label className="block text-xs font-bold text-gray-500 uppercase ml-1">Dokument & Länkar</label>
+            
+            {/* Lista med sparade dokument */}
+            <div className="space-y-2">
+              {(dealData.documents || []).map((doc, index) => (
+                <div key={index} className="flex items-center justify-between bg-blue-50 p-3 rounded-xl border border-blue-100 group">
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-sm font-bold text-blue-900 truncate">{doc.name}</span>
+                    <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 truncate hover:underline underline-offset-2">
+                      {doc.url}
+                    </a>
+                  </div>
+                  <button 
+                    onClick={() => handleRemoveDocument(index)}
+                    className="p-2 text-blue-300 hover:text-red-500 transition-colors"
+                  >
+                    <IconTrash className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Formulär för att lägga till nytt dokument */}
+            <div className="p-3 bg-gray-50 rounded-xl border border-dashed border-gray-300 space-y-2">
+              <input 
+                type="text"
+                placeholder="Namn (t.ex. Offert)"
+                className="w-full text-sm p-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
+                value={tempDocName}
+                onChange={e => setTempDocName(e.target.value)}
+              />
+              <div className="flex gap-2">
+                <input 
+                  type="url"
+                  placeholder="Klistra in länk (https://...)"
+                  className="flex-1 text-sm p-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
+                  value={tempDocUrl}
+                  onChange={e => setTempDocUrl(e.target.value)}
+                />
+                <button 
+                  type="button"
+                  onClick={handleAddDocument}
+                  disabled={!tempDocName || !tempDocUrl}
+                  className="bg-blue-600 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-all"
+                >
+                  Lägg till
+                </button>
+              </div>
             </div>
           </div>
         </div>

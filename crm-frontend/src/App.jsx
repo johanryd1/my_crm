@@ -185,6 +185,7 @@ const handleSaveDeal = async () => {
     const payload = { 
       ...newDeal, 
       account: accountId,
+      documents: newDeal.documents || [],
       stage: parseInt(newDeal.stage || phases[0]?.id),
       value: parseFloat(newDeal.value) || 0
     };
