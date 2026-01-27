@@ -4,6 +4,9 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' eller 'table'
 
+  const [sortField, setSortField] = useState('name'); // Standardfält
+  const [sortDirection, setSortDirection] = useState('asc'); // 'asc' eller 'desc'
+
   // Sökfilter
   const filteredPeople = (people || []).filter(c => {
     const s = (searchTerm || "").toLowerCase();
@@ -15,6 +18,43 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
 
     return fullName.includes(s) || accountName.includes(s) || title.includes(s);
   });
+
+  const sortedPeople = [...filteredPeople].sort((a, b) => {
+    let valA, valB;
+    
+    // Mappa headers till rätt fält i objektet
+    switch (sortField) {
+      case 'name':
+        valA = `${a.first_name} ${a.last_name}`.toLowerCase();
+        valB = `${b.first_name} ${b.last_name}`.toLowerCase();
+        break;
+      case 'account':
+        valA = (a.account_name || "").toLowerCase();
+        valB = (b.account_name || "").toLowerCase();
+        break;
+      case 'role':
+        valA = (a.role || "").toLowerCase();
+        valB = (b.role || "").toLowerCase();
+        break;
+      default:
+        valA = (a[sortField] || "").toLowerCase();
+        valB = (b[sortField] || "").toLowerCase();
+    }
+
+    if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+    if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // En hjälpfunktion för att byta sortering
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
 
   // Funktion för Excel-export (CSV)
   const exportToExcel = () => {
@@ -159,20 +199,35 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Namn</th>
-                  <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Roll</th>
-                  <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Konto</th>
-                  <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">E-post</th>
-                  <th className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Telefon</th>
+                  {[
+                    { id: 'name', label: 'Namn' },
+                    { id: 'role', label: 'Roll' },
+                    { id: 'account', label: 'Konto' },
+                    { id: 'email', label: 'E-post' },
+                    { id: 'phone', label: 'Telefon' }
+                  ].map((header) => (
+                    <th 
+                      key={header.id}
+                      onClick={() => handleSort(header.id)}
+                      className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-blue-600 transition-colors"
+                    >
+                      <div className="flex items-center gap-1">
+                        {header.label}
+                        {sortField === header.id && (
+                          <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filteredPeople.map(person => (
+                {sortedPeople.map(person => (
                   <tr key={person.id} className="hover:bg-blue-50/30 transition-colors group">
                     <td className="p-4">
                       <button 
                         onClick={() => onContactClick(person)}
-                        className="font-bold text-gray-800 hover:text-blue-600 hover:underline text-sm text-left"
+                        className="font-bold text-gray-800 hover:text-blue-600 hover:underline text-sm text-left cursor-pointer"
                       >
                         {person.first_name} {person.last_name}
                       </button>
@@ -181,7 +236,7 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
                     <td className="p-4">
                       <button 
                         onClick={() => onAccountClick && onAccountClick(person.account)}
-                        className="text-sm text-blue-500 hover:underline font-medium text-left"
+                        className="text-sm text-blue-500 hover:underline font-medium text-left cursor-pointer"
                       >
                         {person.account_name}
                       </button>
