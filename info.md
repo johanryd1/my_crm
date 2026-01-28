@@ -35,3 +35,8 @@ För att undvika att din live-sida ligger nere medan du jobbar, följ alltid den
 - Utveckla och testa allt lokalt på din Chromebook (med din lokala Postgres).
 - Pusha till GitHub när du är nöjd.
 - Migrera databasen på Render direkt efteråt om du gjort ändringar i models.py.
+
+
+Titta i min lokala Postgres-databas
+1. I terminalen kör, "python manage.py dbshell"
+2. Kör query, typ "SELECT id, note, account_id, deal_id FROM core_activity ORDER BY id DESC LIMIT 10;"

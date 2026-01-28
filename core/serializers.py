@@ -27,9 +27,11 @@ class DealSerializer(serializers.ModelSerializer):
     # Vi kan även hämta kontots namn så det blir lättare att visa i listor
     account_name = serializers.ReadOnlyField(source='account.name')
 
+    activities = ActivitySerializer(many=True, read_only=True)
+
     class Meta:
         model = Deal
-        fields = ['id', 'name', 'value', 'stage', 'stage_details', 'account', 'account_name']
+        fields = ['id', 'name', 'value', 'stage', 'stage_details', 'account', 'account_name', 'activities', 'documents']
 
     # Valfritt: Om du vill att 'value' alltid ska returneras som ett nummer 
     # och inte en sträng (DecimalField kan ibland bli sträng i JSON)

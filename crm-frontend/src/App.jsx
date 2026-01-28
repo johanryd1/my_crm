@@ -108,11 +108,20 @@ const openCreateDealModal = () => {
 
 // För att REDIGERA
 const openEditDealModal = (deal) => {
-  setEditingDealId(deal.id);
-  // Genom att sätta hela deal-objektet här får vi med 'account'-id:t 
-  // som vi precis lade till i steg 1 ovan.
-  setNewDeal(deal); 
+  // 1. Hitta den absolut senaste versionen av affären från ditt huvud-state (accounts)
+  // Vi letar i 'accounts' eftersom fetchAccounts uppdaterar just den listan.
+  const account = accounts.find(a => a.id === deal.account);
+  const freshDeal = account?.deals?.find(d => d.id === deal.id) || deal;
+
+  // 2. Sätt ID:t och den FÄRSKA affären i statet
+  setEditingDealId(freshDeal.id);
+  setNewDeal(freshDeal); 
   setShowDealModal(true);
+
+  // 3. Uppdatera i bakgrunden (valfritt men bra för nästa gång)
+  if (typeof fetchAccounts === 'function') {
+    fetchAccounts();
+  }
 };
 
 const handleCreateDeal = async () => {
@@ -301,7 +310,7 @@ const fetchActivities = async (accountId) => {
     }
   };
 
-  const addActivity = async (activityData) => {
+ /*  const addActivity = async (activityData) => {
   try {
     const res = await axios.post(`${API_BASE_URL}/api/activities/`, {
       ...activityData, // Här kommer 'note' och 'activity_type' från formuläret
@@ -314,23 +323,74 @@ const fetchActivities = async (accountId) => {
   } catch (err) {
     console.error("Kunde inte spara aktivitet:", err);
   }
+}; */
+
+const addActivity = async (activityData) => {
+  try {
+    const res = await axios.post(`${API_BASE_URL}/api/activities/`, {
+      ...activityData,
+      date: new Date().toISOString().split('T')[0]
+    });
+    
+    const newActivity = res.data;
+
+    // 1. Uppdatera den globala aktivitetslistan för omedelbar feedback
+    setActivities(prev => [newActivity, ...prev]);
+
+    // 2. Uppdatera 'newDeal' så att loggen i den ÖPPNA modalen uppdateras direkt
+    setNewDeal(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        activities: [newActivity, ...(prev.activities || [])]
+      };
+    });
+
+    // 3. VATTENTÄT SYNK: Hämta om all data från databasen.
+    // Detta uppdaterar 'accounts'-staten i bakgrunden så att 
+    // allt är korrekt när du stänger och öppnar modalen igen.
+    if (typeof fetchAccounts === 'function') {
+      await fetchAccounts();
+    }
+
+    return newActivity; 
+  } catch (err) {
+    console.error("Kunde inte spara aktivitet:", err);
+    alert("Kunde inte spara aktiviteten i databasen.");
+    return false;
+  }
 };
   
 const deleteActivity = async (activityId) => {
-  if (!window.confirm("Vill du verkligen ta bort denna aktivitet permanent?")) {
-    return;
-  }
+  if (!window.confirm("Vill du verkligen ta bort denna aktivitet permanent?")) return;
 
   try {
+    // 1. Radera i din lokala Postgres via Django
     await axios.delete(`${API_BASE_URL}/api/activities/${activityId}/`);
     
-    // Uppdatera statet genom att filtrera bort den raderade aktiviteten
+    // 2. Uppdatera den enkla aktivitetslistan direkt (för vyn på kontosidan)
     setActivities(prev => prev.filter(a => a.id !== activityId));
+
+    // 3. VIKTIGT: Hämta om ALL data från backend (fetchAccounts)
+    // Detta gör att din 'accounts'-state och alla dess nästlade 'deals' 
+    // uppdateras med färsk data från Postgres där aktiviteten nu är borta.
+    if (typeof fetchAccounts === 'function') {
+      await fetchAccounts();
+    }
+
+    // 4. Om modalen är öppen, se till att även 'newDeal' rensas
+    setNewDeal(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        activities: (prev.activities || []).filter(a => a.id !== activityId)
+      };
+    });
+
   } catch (err) {
-    console.error("Kunde inte radera aktiviteten:", err);
-    alert("Ett fel uppstod när aktiviteten skulle raderas.");
+    console.error("Kunde inte radera:", err);
   }
-};  
+};
 
 const handleDeleteDeal = async () => {
   if (!editingDealId) return;
@@ -1083,6 +1143,9 @@ return (
               setDealData={setNewDeal}
               phases={phases}
               isEditing={!!editingDealId} // Gör om ID:t till en boolean (true om vi redigerar)
+              contacts={contacts}
+              onAddActivity={addActivity}
+              onDeleteActivity={deleteActivity}
             />
           )}
     </div> 
