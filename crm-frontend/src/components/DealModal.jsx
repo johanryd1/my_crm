@@ -198,6 +198,8 @@ const DealModal = ({
               <h3 className="font-bold text-gray-800">Aktiviteter & Historik</h3>
             </div>
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
+             
+              {/* Skapa ny aktivitet */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                 <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Logga ny aktivitet</h4>
                 <ActivityForm 
@@ -232,6 +234,8 @@ const DealModal = ({
                   }}
                 />
               </div>
+
+              {/* Aktivitetslogg */}
               <div>
                 <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Tidigare händelser</h4>
                 <ActivityLog 
@@ -249,6 +253,8 @@ const DealModal = ({
                   }} 
                 />
               </div>
+
+              
             </div>
           </div>
         )}

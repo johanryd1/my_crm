@@ -55,6 +55,22 @@ const [newDeal, setNewDeal] = useState({
   stage: phases[0]?.id || '' // Sätter första tillgängliga fas som förval
 });
 
+const handleOpenNewDealModal = () => {
+  // 1. Nollställ ID:t så appen vet att det inte är en redigering
+  setEditingDealId(null);
+  
+  // 2. Nollställ newDeal med tomma startvärden
+  setNewDeal({
+    name: '',
+    value: 0,
+    phase: phases[0]?.id || '', // Sätt till första fasen om möjligt
+    account: selectedAccount?.id || '', // Förvinställ kontot om ett är valt
+    activities: []
+  });
+  
+  // 3. Öppna modalen
+  setShowDealModal(true);
+};
 
 const handleUpdateDealPhase = async (dealId, newPhaseId) => {
   console.log(`Flyttar deal ${dealId} till fas ${newPhaseId}`);
@@ -1093,7 +1109,7 @@ return (
                     <Deals 
                       selectedAccount={selectedAccount} 
                       dealPhases={phases} 
-                      onAddDeal={() => setShowDealModal(true)} // Skicka med funktionen som prop
+                      onAddDeal={handleOpenNewDealModal}
                       onEditDeal={openEditDealModal}    // Ny funktion för redigering
                     />
                   )}
