@@ -14,6 +14,10 @@ class DealPhaseSerializer(serializers.ModelSerializer):
         model = DealPhase
         fields = '__all__'
 
+class ActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = ['id', 'account', 'contact', 'activity_type', 'note', 'date', 'deal'] # Se till att 'account' är med!
 
 class DealSerializer(serializers.ModelSerializer):
     # 'stage_details' används för att visa information (read_only)
@@ -25,15 +29,7 @@ class DealSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Deal
-        fields = [
-            'id', 
-            'name', 
-            'value', 
-            'stage',         # Används för att skriva (id)
-            'stage_details', # Används för att läsa (objekt)
-            'account',       # Används för att skriva (id)
-            'account_name'   # Används för att läsa (text)
-        ]
+        fields = ['id', 'name', 'value', 'stage', 'stage_details', 'account', 'account_name']
 
     # Valfritt: Om du vill att 'value' alltid ska returneras som ett nummer 
     # och inte en sträng (DecimalField kan ibland bli sträng i JSON)
@@ -43,13 +39,6 @@ class DealSerializer(serializers.ModelSerializer):
         return representation
 
 
-class DealSerializer(serializers.ModelSerializer):
-    # phase_details = DealPhaseSerializer(source='stage', read_only=True)
-
-    class Meta:
-        model = Deal
-        fields = ['id', 'name', 'value', 'stage', 'account', 'documents']
-
 class AccountSerializer(serializers.ModelSerializer):
     contacts = ContactSerializer(many=True, read_only=True)
     deals = DealSerializer(many=True, read_only=True)
@@ -58,9 +47,6 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ['id', 'name', 'website', 'industry', 'contacts', 'address', 'phone', 'deals', 'created_at']
 
-class ActivitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Activity
-        fields = ['id', 'account', 'contact', 'activity_type', 'note', 'date'] # Se till att 'account' är med!
+
 
         

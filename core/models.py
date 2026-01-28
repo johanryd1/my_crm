@@ -61,6 +61,7 @@ class Activity(models.Model):
     # On_delete=models.CASCADE gör att om företaget tas bort, försvinner även aktiviteterna
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='activities', null=True)
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, related_name='activities', null=True, blank=True)
+    deal = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name='activities', null=True, blank=True)
     
     # Information
     activity_type = models.CharField(max_length=20, choices=ACTIVITY_CHOICES, default='Note')
