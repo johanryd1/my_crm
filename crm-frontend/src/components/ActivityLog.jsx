@@ -38,10 +38,19 @@ export default function ActivityLog({ activities, contactId = null, onDeleteActi
   }
 
   return (
-    <div className="mt-10 px-2">
-      {/* ... (din rubrik-kod) ... */}
+  <div className="mt-10">
+    {/* Rubriken ligger utanför scrollen så den alltid syns */}
+    <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest px-2">
+      Tidigare händelser
+    </h4>
 
-      <div className="relative space-y-8">
+    {/* Scroll-container med fast max-höjd */}
+    <div 
+      className="relative px-2 overflow-y-auto overflow-x-hidden custom-scrollbar" 
+      style={{ maxHeight: '350px' }}
+    >
+      <div className="relative space-y-8 py-2">
+        {/* Den vertikala linjen */}
         <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gray-100"></div>
 
         {sortedActivities.map((a) => {
@@ -53,7 +62,7 @@ export default function ActivityLog({ activities, contactId = null, onDeleteActi
                                    });
 
           return (
-            <div key={a.id} className="relative pl-12 group"> {/* 'group' används för att visa knappen vid hovring */}
+            <div key={a.id} className="relative pl-12 group">
               <div className="absolute left-0 p-2 bg-white border border-gray-100 text-blue-500 rounded-full z-10 shadow-sm">
                 {getActivityIcon(a.activity_type)}
               </div>
@@ -69,7 +78,6 @@ export default function ActivityLog({ activities, contactId = null, onDeleteActi
                       {formattedDateTime}
                     </span>
                     
-                    {/* Radera-knappen */}
                     <button
                       onClick={() => onDeleteActivity(a.id)}
                       className="text-gray-300 hover:text-red-500 transition-colors p-1"
@@ -88,5 +96,6 @@ export default function ActivityLog({ activities, contactId = null, onDeleteActi
         })}
       </div>
     </div>
-  );
+  </div>
+);
 }

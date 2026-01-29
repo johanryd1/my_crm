@@ -49,12 +49,12 @@ const DealModal = ({
       {/* Modalen växer i bredd när showActivities är true */}
       <div className={`bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200 flex transition-all duration-300 ${
         showActivities ? 'max-w-4xl w-full' : 'max-w-md w-full'
-      }`}>
-        
-        {/* VÄNSTER PANEL: Deal-info */}
+      }`} style={{ height: '85vh' }}> {/* Tvingar modalen att vara 85% av skärmhöjden */}
+
+        {/* VÄNSTER PANEL */}
         <div className="flex-1 flex flex-col min-w-[400px]">
           {/* Header */}
-          <div className="p-6 border-b border-gray-100 flex justify-between items-start">
+          <div className="p-6 border-b border-gray-100 flex-none flex justify-between items-start">
             <div>
               <h2 className="text-xl font-bold text-gray-900">
                 {isEditing ? 'Redigera affär' : 'Skapa ny affärsmöjlighet'}
@@ -63,10 +63,11 @@ const DealModal = ({
                 {isEditing ? 'Uppdatera detaljerna för denna affär' : 'Lägg till en ny affär på kontot'}
               </p>
             </div>
+
             {isEditing && (
               <button 
                 onClick={() => setShowActivities(!showActivities)}
-                className={`ml-4 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`ml-4 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                   showActivities 
                   ? 'bg-blue-100 text-blue-700' 
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -77,7 +78,7 @@ const DealModal = ({
             )}
           </div>
           
-          <div className="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
+          <div className="p-6 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
             {/* Namn-fält */}
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Affärens namn</label>
@@ -236,22 +237,18 @@ const DealModal = ({
               </div>
 
               {/* Aktivitetslogg */}
-              <div>
+              <div className="mt-6 border-t pt-6 flex flex-col">
                 <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Tidigare händelser</h4>
-                <ActivityLog 
-                  activities={dealData.activities || []} 
-                  onDeleteActivity={async (id) => {
-                    // 1. Kör själva raderingen i App.jsx
-                    await onDeleteActivity(id);
-                    
-                    // 2. Uppdatera dealData lokalt i modalen direkt
-                    // Detta gör att aktiviteten försvinner framför ögonen på dig
-                    setDealData(prev => ({
-                      ...prev,
-                      activities: prev.activities.filter(a => a.id !== id)
-                    }));
-                  }} 
-                />
+                    <ActivityLog 
+                      activities={dealData.activities || []} 
+                      onDeleteActivity={async (id) => {
+                        await onDeleteActivity(id);
+                        setDealData(prev => ({
+                          ...prev,
+                          activities: (prev.activities || []).filter(a => a.id !== id)
+                        }));
+                      }} 
+                    />
               </div>
 
               
