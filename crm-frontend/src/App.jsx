@@ -8,6 +8,7 @@ import ContactList from './components/ContactList';
 import ContactForm from './components/ContactForm';
 import Settings from './components/Settings';
 import PeopleView from './components/PeopleView';
+import EditActivityModal from './components/EditActivityModal';
 import Deals from './components/Deals';
 import DealModal from './components/DealModal';
 import PipelineView from './components/PipelineView'; 
@@ -36,17 +37,26 @@ function App() {
   phone: '',
   role: ''
 });
-  const [phases, setPhases] = useState([]);
-  const [showInactive, setShowInactive] = useState(false);
-  const [view, setView] = useState('dashboard'); // 'dashboard' eller 'settings'
-  const [newActivity, setNewActivity] = useState({ 
-    note: '', 
-    activity_type: 'Call', // Standardval
-    contact: '' // För att kunna koppla till en specifik person
-  });
-    const [searchTerm, setSearchTerm] = useState('')
+const [phases, setPhases] = useState([]);
+const [showInactive, setShowInactive] = useState(false);
+const [view, setView] = useState('dashboard'); // 'dashboard' eller 'settings'
+const [newActivity, setNewActivity] = useState({ 
+  note: '', 
+  activity_type: 'Call', // Standardval
+  contact: '' // För att kunna koppla till en specifik person
+});
+const [searchTerm, setSearchTerm] = useState('')
+const [activeTab, setActiveTab] = useState('deals'); // 'contacts' eller 'activities'
 
-  const [activeTab, setActiveTab] = useState('deals'); // 'contacts' eller 'activities'
+// I App.jsx
+const [editingActivity, setEditingActivity] = useState(null);
+const [showActivityEditModal, setShowActivityEditModal] = useState(false);
+
+const openEditActivityModal = (activity) => {
+  console.log("App.jsx tog emot aktivitet för redigering:", activity); // <--- LOGGA HÄR
+  setEditingActivity(activity);
+  setShowActivityEditModal(true);
+};
 
 const [showDealModal, setShowDealModal] = useState(false);
 const [newDeal, setNewDeal] = useState({
@@ -70,6 +80,22 @@ const handleOpenNewDealModal = () => {
   
   // 3. Öppna modalen
   setShowDealModal(true);
+};
+
+const updateActivity = async (updatedData) => {
+  try {
+    const res = await axios.put(`${API_BASE_URL}/api/activities/${updatedData.id}/`, updatedData);
+    
+    // 1. Uppdatera globala listan
+    setActivities(prev => prev.map(a => a.id === updatedData.id ? res.data : a));
+    
+    // 2. Uppdatera accounts-state (för att modalen ska visa rätt direkt)
+    await fetchAccounts(); 
+    
+    setShowActivityEditModal(false);
+  } catch (err) {
+    console.error("Kunde inte uppdatera aktivitet:", err);
+  }
 };
 
 const handleUpdateDealPhase = async (dealId, newPhaseId) => {
@@ -643,6 +669,8 @@ const handleAddContact = async (contactData) => {
       //setIsEditingContact(true);
     };
 
+    //console.log("DEBUG - contacts:", contacts);
+
   // --- RENDERING ---
 return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 flex justify-center font-sans">
@@ -1095,7 +1123,11 @@ return (
                       {/* Vänster: Lista */}
                       <div className="md:col-span-7">
                         <h2 className="text-xl font-bold mb-4 text-gray-700">Aktivitetslogg</h2>
-                        <ActivityLog activities={activities} onDeleteActivity={deleteActivity} />
+                        <ActivityLog 
+                          activities={activities} 
+                          onDeleteActivity={deleteActivity} 
+                          onEditActivity={openEditActivityModal} 
+                        />
                       </div>
                       {/* Höger: Formulär */}
                       <div className="md:col-span-5 bg-gray-50 p-4 rounded-lg border border-gray-100">
@@ -1162,6 +1194,17 @@ return (
               contacts={contacts}
               onAddActivity={addActivity}
               onDeleteActivity={deleteActivity}
+              onEditActivity={openEditActivityModal}
+            />
+          )}
+
+          {showActivityEditModal && (
+            <EditActivityModal
+              isOpen={showActivityEditModal}
+              activity={editingActivity}
+              contacts={contacts}
+              onClose={() => setShowActivityEditModal(false)}
+              onSave={updateActivity}
             />
           )}
     </div> 

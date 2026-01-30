@@ -16,15 +16,15 @@ const getActivityIcon = (type) => {
 // Hjälpfunktion för att visa snygga svenska namn
 const getLabel = (type) => {
   const labels = {
-    'Call': 'Telefonsamtal',
-    'Email': 'E-post',
+    'Call': 'Samtal',
+    'Email': 'E-Post',
     'Meeting': 'Möte',
-    'Note': 'Anteckning'
+    'Note': 'Notering'
   };
   return labels[type] || type;
 };
 
-export default function ActivityLog({ activities, contactId = null, onDeleteActivity }) {
+export default function ActivityLog({ activities, contactId = null, onDeleteActivity, onEditActivity }) {
   const filteredActivities = contactId 
     ? activities.filter(a => Number(a.contact) === Number(contactId))
     : activities;
@@ -69,9 +69,21 @@ export default function ActivityLog({ activities, contactId = null, onDeleteActi
               
               <div className="flex flex-col">
                 <div className="flex justify-between items-baseline border-b border-gray-50 pb-1 mb-1">
-                  <span className="text-sm font-bold text-gray-800">
+                  
+                  {/* Nu klickbar för redigering */}
+                  <button 
+                    onClick={() => {
+                      console.log("Klickade på aktivitet:", a.id); // <--- LOGGA HÄR
+                      if (onEditActivity) {
+                        onEditActivity(a);
+                      } else {
+                        console.warn("onEditActivity finns inte som prop i ActivityLog");
+                      }
+                    }} 
+                    className="text-sm font-bold text-gray-800 hover:text-blue-600 transition-colors cursor-pointer text-left"
+                  >
                     {getLabel(a.activity_type)}
-                  </span>
+                  </button>
                   
                   <div className="flex items-center gap-3">
                     <span className="text-[11px] font-mono text-gray-400">

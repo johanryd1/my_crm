@@ -14,7 +14,8 @@ const DealModal = ({
   isEditing,
   contacts = [],
   onAddActivity,
-  onDeleteActivity
+  onDeleteActivity,
+  onEditActivity
 }) => {
   const [tempDocName, setTempDocName] = useState('');
   const [tempDocUrl, setTempDocUrl] = useState('');
@@ -216,19 +217,13 @@ const DealModal = ({
                     const success = await onAddActivity(payload);
 
                     if (success) {
-                      // ISTÄLLET FÖR onSave(): 
-                      // Vi uppdaterar dealData lokalt så att den nya aktiviteten syns i loggen direkt
-                      // 'success' bör i din App.jsx returnera den skapade aktiviteten från backend
-                      
-                      // Om din addActivity i App.jsx returnerar res.data (den nya aktiviteten):
                       if (success.id) { 
                         setDealData({
                           ...dealData,
                           activities: [success, ...(dealData.activities || [])]
                         });
                       } else {
-                        // Om den bara returnerar true/false, anropa fetchAccounts för att hämta ny data i bakgrunden
-                        // men utan att stänga modalen!
+                        
                         if (typeof fetchAccounts === 'function') fetchAccounts();
                       }
                     }
@@ -248,6 +243,19 @@ const DealModal = ({
                           activities: (prev.activities || []).filter(a => a.id !== id)
                         }));
                       }} 
+                      // Lägg till detta för redigering:
+                      onEditActivity={(activity) => {
+                        // Vi skickar med en "callback" så att när EditActivityModal sparar, 
+                        // så uppdateras även vyn här i DealModal direkt.
+                        onEditActivity(activity, (updatedActivity) => {
+                          setDealData(prev => ({
+                            ...prev,
+                            activities: (prev.activities || []).map(a => 
+                              a.id === updatedActivity.id ? updatedActivity : a
+                            )
+                          }));
+                        });
+                      }}
                     />
               </div>
 
