@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  DndContext, 
-  closestCorners, 
-  PointerSensor, 
-  useSensor, 
-  useSensors, 
+import {
+  DndContext,
+  closestCorners,
+  PointerSensor,
+  useSensor,
+  useSensors,
   DragOverlay,
   useDroppable,
-  useDraggable 
+  useDraggable
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { DollarSign } from './Icons'; // Din specifika import
@@ -30,19 +30,19 @@ const DealCard = ({ deal, phaseColor, onEdit, isOverlay = false }) => {
   const lightBg = `${phaseColor}15`;
 
   return (
-    <div 
-      ref={setNodeRef} 
-      style={style} 
-      {...listeners} 
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
       {...attributes}
       onClick={() => !isOverlay && onEdit(deal)}
-      className={`bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-blue-400 transition-all group relative overflow-hidden mb-3 ${isOverlay ? 'shadow-2xl border-blue-500' : ''}`}
+      className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all group relative overflow-hidden mb-3 ${isOverlay ? 'shadow-2xl border-blue-500' : ''}`}
     >
       <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: phaseColor }} />
-      <p className="text-[10px] uppercase text-gray-400 font-bold mb-1 tracking-wider">{deal.accountName}</p>
-      <h4 className="font-bold text-gray-900 group-hover:text-blue-600 mb-2">{deal.name}</h4>
+      <p className="text-[10px] uppercase text-gray-400 dark:text-gray-500 font-bold mb-1 tracking-wider">{deal.accountName}</p>
+      <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-2">{deal.name}</h4>
       <div className="flex justify-between items-center">
-        <span className="text-sm font-black text-gray-700">
+        <span className="text-sm font-black text-gray-700 dark:text-gray-300">
           {new Intl.NumberFormat('sv-SE').format(deal.value)} kr
         </span>
         <div className="p-1.5 rounded" style={{ backgroundColor: lightBg, color: phaseColor }}>
@@ -55,24 +55,24 @@ const DealCard = ({ deal, phaseColor, onEdit, isOverlay = false }) => {
 
 // --- KOMPONENT FÖR EN KOLUMN (DROPPABLE) ---
 const PhaseColumn = ({ phase, deals, onEditDeal }) => {
-  const { setNodeRef, isOver } = useDroppable({ 
-    id: phase.id.toString() 
+  const { setNodeRef, isOver } = useDroppable({
+    id: phase.id.toString()
   });
-  
+
   const totalValue = deals.reduce((sum, d) => sum + Number(d.value), 0);
 
   return (
-    <div 
-      ref={setNodeRef} 
+    <div
+      ref={setNodeRef}
       className={`flex-shrink-0 w-72 flex flex-col rounded-xl border transition-colors h-full ${
-        isOver ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
+        isOver ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
       }`}
     >
-      <div 
-        className="p-4 border-b border-gray-200 bg-white rounded-t-xl border-t-4" 
+      <div
+        className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-xl border-t-4"
         style={{ borderTopColor: phase.color }}
       >
-        <h3 className="font-bold text-gray-800 flex justify-between items-center">
+        <h3 className="font-bold text-gray-800 dark:text-gray-100 flex justify-between items-center">
           {phase.name}
           <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: `${phase.color}15`, color: phase.color }}>
             {deals.length}
@@ -101,9 +101,9 @@ const PipelineView = ({ phases, accounts, onEditDeal, onUpdateDealPhase }) => {
   );
 
 
-const allDeals = accounts.flatMap(acc => 
-  (acc.deals || []).map(deal => ({ 
-    ...deal, 
+const allDeals = accounts.flatMap(acc =>
+  (acc.deals || []).map(deal => ({
+    ...deal,
     accountName: acc.name,
     account: acc.id // LÄGG TILL DENNA RAD!
   }))
@@ -133,18 +133,18 @@ const allDeals = accounts.flatMap(acc =>
   };
 
   return (
-    <DndContext 
-      sensors={sensors} 
-      collisionDetection={closestCorners} 
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
       <div className="flex gap-4 overflow-x-auto pb-4 h-[calc(100vh-200px)] min-h-[500px]">
         {phases.map(phase => (
-          <PhaseColumn 
-            key={phase.id} 
-            phase={phase} 
-            deals={allDeals.filter(d => d.stage.toString() === phase.id.toString())} 
+          <PhaseColumn
+            key={phase.id}
+            phase={phase}
+            deals={allDeals.filter(d => d.stage.toString() === phase.id.toString())}
             onEditDeal={onEditDeal}
           />
         ))}
@@ -154,9 +154,9 @@ const allDeals = accounts.flatMap(acc =>
       <DragOverlay zIndex={1000}>
         {activeDeal ? (
           <div className="w-72 transform rotate-2 cursor-grabbing">
-            <DealCard 
-              deal={activeDeal} 
-              phaseColor={phases.find(p => p.id === activeDeal.stage)?.color || '#3b82f6'} 
+            <DealCard
+              deal={activeDeal}
+              phaseColor={phases.find(p => p.id === activeDeal.stage)?.color || '#3b82f6'}
               isOverlay={true}
             />
           </div>

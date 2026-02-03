@@ -12,7 +12,7 @@ import EditActivityModal from './components/EditActivityModal';
 import Deals from './components/Deals';
 import DealModal from './components/DealModal';
 import PipelineView from './components/PipelineView'; 
-import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon, CRMIcon, ActivityIcon, DollarSign } from './components/Icons';
+import { IconCall, IconEmail, IconMeeting, IconNote, IconTrash, SettingsIcon, CRMIcon, ActivityIcon, DollarSign, IconSun, IconMoon } from './components/Icons';
 import API_BASE_URL from './api'; // Importera din nya konfiguration
 
 function App() {
@@ -47,6 +47,33 @@ const [newActivity, setNewActivity] = useState({
 });
 const [searchTerm, setSearchTerm] = useState('')
 const [activeTab, setActiveTab] = useState('deals'); // 'contacts' eller 'activities'
+
+// Theme state - initialize from localStorage or system preference
+const [theme, setTheme] = useState(() => {
+  if (typeof window !== 'undefined') {
+    return localStorage.theme || 'auto';
+  }
+  return 'auto';
+});
+
+// Apply theme to document
+useEffect(() => {
+  const root = document.documentElement;
+  if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+  if (theme !== 'auto') {
+    localStorage.theme = theme;
+  } else {
+    localStorage.removeItem('theme');
+  }
+}, [theme]);
+
+const toggleTheme = () => {
+  setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+};
 
 // I App.jsx
 const [editingActivity, setEditingActivity] = useState(null);
@@ -673,7 +700,7 @@ const handleAddContact = async (contactData) => {
 
   // --- RENDERING ---
 return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8 flex justify-center font-sans">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 flex justify-center font-sans transition-colors">
       <div className="w-full max-w-6xl">
         
         {/* --- LOGOTYP-SEKTION --- */}
@@ -695,43 +722,43 @@ return (
 
           {/* 2. Navigering (Centrerad) */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="bg-white border border-gray-100 p-1 rounded-2xl shadow-sm flex gap-1">
-              <button 
-                onClick={() => { 
-                  setView('dashboard'); 
-                  setSelectedAccount(null); 
+            <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-1 rounded-2xl shadow-sm flex gap-1">
+              <button
+                onClick={() => {
+                  setView('dashboard');
+                  setSelectedAccount(null);
                   setEditingDealId(null); // Nollställer valt deal-ID
                   setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' }); // Rensar deal-datan
                 }}
                 className={`px-8 py-2 rounded-xl text-sm font-bold transition-all ${
-                  view === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+                  view === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
                 Konton
               </button>
               {/* NY TABB */}
-              <button 
-                onClick={() => { 
-                  setView('pipeline'); 
-                  setSelectedAccount(null); 
+              <button
+                onClick={() => {
+                  setView('pipeline');
+                  setSelectedAccount(null);
                   setEditingDealId(null); // Nollställer valt deal-ID
                   setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' }); // Rensar deal-datan
                 }}
                 className={`px-8 py-2 rounded-xl text-sm font-bold transition-all ${
-                  view === 'pipeline' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+                  view === 'pipeline' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
                 Affärer
               </button>
-              <button 
-                onClick={() => { 
-                  setView('people'); 
-                  setSelectedAccount(null); 
+              <button
+                onClick={() => {
+                  setView('people');
+                  setSelectedAccount(null);
                   setEditingDealId(null); // Nollställer valt deal-ID
                   setNewDeal({ name: '', value: '', stage: phases[0]?.id || '' }); // Rensar deal-datan
                 }}
                 className={`px-8 py-2 rounded-xl text-sm font-bold transition-all ${
-                  view === 'people' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+                  view === 'people' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
                 Personer
@@ -739,18 +766,28 @@ return (
             </div>
           </div>
 
-          {/* 3. Inställningar (Höger) */}
-          <div className="flex-shrink-0">
-            <button 
+          {/* 3. Inställningar + Theme toggle (Höger) */}
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <button
               onClick={() => { setView('settings'); setSelectedAccount(null); }}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all ${
-                view === 'settings' 
-                  ? 'bg-blue-50 text-blue-600 ring-1 ring-blue-100' 
-                  : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                view === 'settings'
+                  ? 'bg-blue-50 text-blue-600 ring-1 ring-blue-100 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300'
               }`}
             >
               <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Inställningar</span>
               <SettingsIcon className="h-5 w-5" />
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-all"
+              title={theme === 'dark' ? 'Byt till ljust läge' : 'Byt till mörkt läge'}
+            >
+              {theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                ? <IconSun className="h-5 w-5" />
+                : <IconMoon className="h-5 w-5" />
+              }
             </button>
           </div>
 
@@ -808,32 +845,32 @@ return (
   
                 {/* Header med rubrik och antal */}
                 <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-3xl font-bold text-gray-800">Mina konton</h1>
-                  
+                  <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Mina konton</h1>
+
                   {/* Antals-badge som matchar PeopleView */}
-                  <span className="text-sm text-gray-500 font-medium bg-white px-4 py-1.5 rounded-full shadow-sm border border-gray-100">
+                  <span className="text-sm text-gray-500 dark:text-gray-400 font-medium bg-white dark:bg-gray-800 px-4 py-1.5 rounded-full shadow-sm border border-gray-100 dark:border-gray-700">
                     {filteredAccounts.length} {filteredAccounts.length === 1 ? 'konto' : 'konton'}
                   </span>
                 </div>
 
                 <div className="mb-6">
-                  <input 
+                  <input
                     type="text"
                     placeholder="Sök bland konton..."
-                    className="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full pl-4 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
                   <form onSubmit={handleSubmit} className="flex gap-4">
-                    <input 
+                    <input
                       type="text"
-                      value={newName} 
+                      value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       placeholder="Nytt konto..."
-                      className="flex-1 border border-gray-300 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                      className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                     />
                     <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition">
                       Spara
@@ -841,17 +878,17 @@ return (
                   </form>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <ul className="divide-y divide-gray-200">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredAccounts.map((acc) => {
                       const dealCount = acc.deals ? acc.deals.length : 0;
 
                       return (
-                        <li key={acc.id} className="px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-all group">
+                        <li key={acc.id} className="px-6 py-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all group">
                           <div className="flex items-center gap-4 flex-1">
                             <div className="flex items-center gap-3"> {/* Rad för namn och badge */}
-                              <span 
-                                className="font-bold text-gray-900 cursor-pointer hover:text-blue-600 hover:underline transition-colors"
+                              <span
+                                className="font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
                                 onClick={() => {
                                   setSelectedAccount(acc);
                                   fetchContacts(acc.id);
@@ -860,10 +897,10 @@ return (
                               >
                                 {acc.name}
                               </span>
-                              
+
                               {/* Badge direkt efter namnet */}
                               {dealCount > 0 && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                                   {dealCount} {dealCount === 1 ? 'affär' : 'affärer'}
                                 </span>
                               )}
@@ -871,9 +908,9 @@ return (
                           </div>
 
                           <div className="flex items-center">
-                            <button 
+                            <button
                               onClick={() => deleteAccount(acc.id)}
-                              className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                              className="p-2 text-gray-300 dark:text-gray-600 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                               title="Ta bort konto"
                             >
                               <IconTrash className="w-5 h-5" />
@@ -888,18 +925,18 @@ return (
             ) : (
               /* ================= VY 2: DETALJVY ================= */
               <div>
-                <button onClick={() => setSelectedAccount(null)} className="text-gray-600 mb-6 hover:text-black flex items-center gap-1 font-medium">
+                <button onClick={() => setSelectedAccount(null)} className="text-gray-600 dark:text-gray-400 mb-6 hover:text-black dark:hover:text-white flex items-center gap-1 font-medium">
                   ← Tillbaka
                 </button>
-                
-                <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border-t-8 border-blue-600">
+
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8 border-t-8 border-blue-600">
                   {/* Header-sektion */}
                   <div className="flex justify-between items-start mb-8">
                     <div className="flex items-center gap-4">
-                      <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
+                      <h1 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
                         {selectedAccount.name}
                       </h1>
-                      <span className="text-sm text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded-full border border-gray-100 mt-1">
+                      <span className="text-sm text-gray-400 dark:text-gray-500 font-medium bg-gray-50 dark:bg-gray-700 px-3 py-1 rounded-full border border-gray-100 dark:border-gray-600 mt-1">
                         Skapat {selectedAccount.created_at ? new Date(selectedAccount.created_at).toLocaleDateString('sv-SE') : 'Okänt datum'}
                       </span>
                     </div>
@@ -939,26 +976,26 @@ return (
                       {/* Vänster kolumn: Plats & Bransch */}
                       <div className="space-y-6">
                         <div>
-                          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Adress</label>
-                          <div className="flex items-start gap-3 text-gray-700">
+                          <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Adress</label>
+                          <div className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
                             <span className="text-xl">📍</span>
                             <div className="leading-relaxed text-lg">
                               {selectedAccount.address ? (
                                 selectedAccount.address.split(',').map((line, i) => (
-                                  <div key={i} className={i === 0 ? "font-medium text-gray-900" : ""}>{line.trim()}</div>
+                                  <div key={i} className={i === 0 ? "font-medium text-gray-900 dark:text-gray-100" : ""}>{line.trim()}</div>
                                 ))
                               ) : (
-                                <span className="text-gray-400 italic">Ingen adress angiven</span>
+                                <span className="text-gray-400 dark:text-gray-500 italic">Ingen adress angiven</span>
                               )}
                             </div>
                           </div>
                         </div>
-                        
+
                         <div>
-                          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Bransch</label>
-                          <div className="flex items-center gap-3 text-gray-700">
+                          <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Bransch</label>
+                          <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                             <span className="text-xl">🏢</span>
-                            <span className="text-lg">{selectedAccount.industry || <span className="text-gray-400 italic">Ej angivet</span>}</span>
+                            <span className="text-lg">{selectedAccount.industry || <span className="text-gray-400 dark:text-gray-500 italic">Ej angivet</span>}</span>
                           </div>
                         </div>
                       </div>
@@ -966,30 +1003,30 @@ return (
                       {/* Höger kolumn: Kontaktuppgifter */}
                       <div className="space-y-6">
                         <div>
-                          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Telefonnummer</label>
-                          <div className="flex items-center gap-3 text-gray-700">
+                          <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Telefonnummer</label>
+                          <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                             <span className="text-xl">📞</span>
                             <span className="text-lg">
                               {selectedAccount.phone ? (
-                                <a href={`tel:${selectedAccount.phone}`} className="hover:text-blue-600 transition-colors">{selectedAccount.phone}</a>
+                                <a href={`tel:${selectedAccount.phone}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{selectedAccount.phone}</a>
                               ) : (
-                                <span className="text-gray-400 italic">Inget nummer</span>
+                                <span className="text-gray-400 dark:text-gray-500 italic">Inget nummer</span>
                               )}
                             </span>
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Webbplats</label>
-                          <div className="flex items-center gap-3 text-gray-700">
+                          <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Webbplats</label>
+                          <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                             <span className="text-xl">🌐</span>
                             <span className="text-lg">
                               {selectedAccount.website ? (
-                                <a href={selectedAccount.website} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-medium">
+                                <a href={selectedAccount.website} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
                                   {selectedAccount.website.replace(/^https?:\/\//, '')}
                                 </a>
                               ) : (
-                                <span className="text-gray-400 italic">Ingen webbplats</span>
+                                <span className="text-gray-400 dark:text-gray-500 italic">Ingen webbplats</span>
                               )}
                             </span>
                           </div>
@@ -998,7 +1035,7 @@ return (
                     </div>
                   ) : (
                     /* REDIGERINGSLÄGE */
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50 p-6 rounded-xl border border-dashed border-gray-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50 dark:bg-gray-700 p-6 rounded-xl border border-dashed border-gray-300 dark:border-gray-600">
                       <div className="space-y-5">
                         <div>
                           <label className="block text-xs font-bold text-gray-500 mb-1 ml-1">Adress (Använd komma för radbrytning)</label>
@@ -1045,21 +1082,20 @@ return (
                 </div>
 
                 {/* Flik-navigering */}
-                <div className="flex space-x-2 border-b border-gray-200 mb-6 bg-gray-50/50 p-1 rounded-t-lg">
+                <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700 mb-6 bg-gray-50/50 dark:bg-gray-800/50 p-1 rounded-t-lg">
                   
                   {/* NY TABB: Affärer (Deals) */}
                   <button
                     onClick={() => setActiveTab('deals')}
                     className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
-                      activeTab === 'deals' 
-                      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
-                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                      activeTab === 'deals'
+                      ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm border border-gray-200 dark:border-gray-600 ring-1 ring-black/5'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
-                    {/* Byt ut DollarSign mot den ikon du har importerat, t.ex. Briefcase eller TrendingUp */}
                     <DollarSign size={18} color={activeTab === 'deals' ? "#2563eb" : "#6b7280"} />
                     <span>Affärer</span>
-                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'deals' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'deals' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}`}>
                       {selectedAccount.deals?.length || 0}
                     </span>
                   </button>
@@ -1068,14 +1104,14 @@ return (
                   <button
                     onClick={() => setActiveTab('contacts')}
                     className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
-                      activeTab === 'contacts' 
-                      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
-                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                      activeTab === 'contacts'
+                      ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm border border-gray-200 dark:border-gray-600 ring-1 ring-black/5'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
                     <CRMIcon size={18} color={activeTab === 'contacts' ? "#2563eb" : "#6b7280"} />
                     <span>Kontakter</span>
-                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'contacts' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'contacts' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}`}>
                       {contacts.length}
                     </span>
                   </button>
@@ -1084,26 +1120,26 @@ return (
                   <button
                     onClick={() => setActiveTab('activities')}
                     className={`flex items-center gap-2 py-2.5 px-5 rounded-lg font-medium text-sm transition-all duration-200 ${
-                      activeTab === 'activities' 
-                      ? 'bg-white text-blue-600 shadow-sm border border-gray-200 ring-1 ring-black/5' 
-                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                      activeTab === 'activities'
+                      ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm border border-gray-200 dark:border-gray-600 ring-1 ring-black/5'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
                     <ActivityIcon size={18} color={activeTab === 'activities' ? "#2563eb" : "#6b7280"} />
                     <span>Aktivitetslogg</span>
-                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'activities' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
+                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === 'activities' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}`}>
                       {activities.length}
                     </span>
                   </button>
                 </div>
 
                 {/* Flik-innehåll */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                   {activeTab === 'contacts' && (
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                       {/* Vänster: Lista */}
                       <div className="md:col-span-7">
-                        <h2 className="text-xl font-bold mb-4 text-gray-700">Kontaktpersoner</h2>
+                        <h2 className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-200">Kontaktpersoner</h2>
                         <ContactList 
                           contacts={contacts} 
                           onContactClick={handleSelectContact} 
@@ -1111,8 +1147,8 @@ return (
                         />
                       </div>
                       {/* Höger: Formulär */}
-                      <div className="md:col-span-5 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                        <h3 className="font-semibold mb-3">Ny kontakt</h3>
+                      <div className="md:col-span-5 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-100 dark:border-gray-600">
+                        <h3 className="font-semibold mb-3 text-gray-900 dark:text-gray-100">Ny kontakt</h3>
                         <ContactForm onAddContact={handleAddContact} />
                       </div>
                     </div>
@@ -1122,7 +1158,7 @@ return (
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                       {/* Vänster: Lista */}
                       <div className="md:col-span-7">
-                        <h2 className="text-xl font-bold mb-4 text-gray-700">Aktivitetslogg</h2>
+                        <h2 className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-200">Aktivitetslogg</h2>
                         <ActivityLog 
                           activities={activities} 
                           onDeleteActivity={deleteActivity} 
@@ -1130,8 +1166,8 @@ return (
                         />
                       </div>
                       {/* Höger: Formulär */}
-                      <div className="md:col-span-5 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                        <h3 className="font-semibold mb-3">Logga aktivitet</h3>
+                      <div className="md:col-span-5 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-100 dark:border-gray-600">
+                        <h3 className="font-semibold mb-3 text-gray-900 dark:text-gray-100">Logga aktivitet</h3>
                         <ActivityForm onAddActivity={addActivity} contacts={contacts} />
                       </div>
                     </div>

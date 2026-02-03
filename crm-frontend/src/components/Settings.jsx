@@ -4,7 +4,7 @@ import { IconTrash } from './Icons';
 import API_BASE_URL from './../api'; // Importera din nya konfiguration
 
 const PRESET_COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', 
+  '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
   '#8b5cf6', '#ec4899', '#64748b', '#06b6d4'
 ];
 
@@ -53,21 +53,21 @@ export default function Settings() {
       
       {/* --- RUBRIK --- */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Inställningar</h1>
-        <p className="text-gray-500">Inställningar för ditt CRM</p>
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Inställningar</h1>
+        <p className="text-gray-500 dark:text-gray-400">Inställningar för ditt CRM</p>
       </div>
 
       {/* --- FORMULÄR-RUTA --- */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h2 className="text-xl font-bold mb-4 text-gray-700">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <h2 className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-200">
           {editingId ? 'Redigera fas för affärer' : 'Skapa ny fas för affärer'}
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Fasnamn</label>
-            <input 
-              className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-gray-50 focus:bg-white"
+            <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1 ml-1">Fasnamn</label>
+            <input
+              className="w-full border border-gray-200 dark:border-gray-600 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-gray-50 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 text-gray-900 dark:text-gray-100"
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
               placeholder="t.ex. Kvalificerad lead"
@@ -75,21 +75,21 @@ export default function Settings() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Välj färgtema</label>
+            <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-2 ml-1">Välj färgtema</label>
             <div className="flex flex-wrap gap-3 mb-3">
               {PRESET_COLORS.map(color => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => setFormData({...formData, color})}
-                  className={`w-8 h-8 rounded-full border-4 transition-all ${formData.color === color ? 'border-gray-300 scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
+                  className={`w-8 h-8 rounded-full border-4 transition-all ${formData.color === color ? 'border-gray-300 dark:border-gray-500 scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
                   style={{ backgroundColor: color }}
                 />
               ))}
               <div className="relative">
-                 <input 
-                  type="color" 
-                  value={formData.color} 
+                 <input
+                  type="color"
+                  value={formData.color}
                   onChange={e => setFormData({...formData, color: e.target.value})}
                   className="w-8 h-8 p-0 border-none bg-transparent cursor-pointer rounded-full overflow-hidden"
                 />
@@ -98,22 +98,22 @@ export default function Settings() {
           </div>
 
           <div className="flex items-center gap-2 py-2">
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               id="is_default"
-              className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:bg-gray-700"
               checked={formData.is_default}
               onChange={e => setFormData({...formData, is_default: e.target.checked})}
             />
-            <label htmlFor="is_default" className="text-sm font-medium text-gray-600 cursor-pointer">Sätt som standard för nya deals</label>
+            <label htmlFor="is_default" className="text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer">Sätt som standard för nya deals</label>
           </div>
 
           <div className="flex gap-2 pt-2">
-            <button type="submit" className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all">
+            <button type="submit" className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 dark:shadow-blue-900/30 transition-all">
               {editingId ? 'Uppdatera fas' : 'Spara ny fas'}
             </button>
             {editingId && (
-              <button type="button" onClick={resetForm} className="bg-gray-100 text-gray-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all">
+              <button type="button" onClick={resetForm} className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-6 py-3 rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
                 Avbryt
               </button>
             )}
@@ -123,43 +123,43 @@ export default function Settings() {
 
       {/* --- LISTA MED FAS-KORT (Samma bredd som formuläret) --- */}
       <div className="space-y-3">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Befintliga faser</h3>
+        <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase ml-1 tracking-widest">Befintliga faser</h3>
         {phases.map(phase => (
-          <div 
-            key={phase.id} 
-            className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all relative overflow-hidden group flex items-center justify-between"
+          <div
+            key={phase.id}
+            className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all relative overflow-hidden group flex items-center justify-between"
           >
             {/* Färgindikator på kanten */}
             <div className="absolute top-0 left-0 w-1.5 h-full" style={{ backgroundColor: phase.color }} />
 
             <div className="flex items-center gap-4 ml-2">
-              <div 
+              <div
                 className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black shadow-inner"
                 style={{ backgroundColor: phase.color }}
               >
                 {phase.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h3 className="font-bold text-gray-800">{phase.name}</h3>
+                <h3 className="font-bold text-gray-800 dark:text-gray-100">{phase.name}</h3>
                 <div className="flex items-center gap-2">
                   {phase.is_default && (
-                    <span className="text-[9px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Standard</span>
+                    <span className="text-[9px] bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Standard</span>
                   )}
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Steg {phase.order + 1}</span>
+                  <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-tighter">Steg {phase.order + 1}</span>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2 pr-2">
-              <button 
+              <button
                 onClick={() => startEdit(phase)}
-                className="text-xs font-bold text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
+                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-3 py-2 rounded-lg transition-colors"
               >
                 Redigera
               </button>
-              <button 
+              <button
                 onClick={() => deletePhase(phase.id)}
-                className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
               >
                 <IconTrash className="w-5 h-5" />
               </button>

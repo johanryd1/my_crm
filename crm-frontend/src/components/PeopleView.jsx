@@ -21,7 +21,7 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
 
   const sortedPeople = [...filteredPeople].sort((a, b) => {
     let valA, valB;
-    
+
     // Mappa headers till rätt fält i objektet
     switch (sortField) {
       case 'name':
@@ -59,10 +59,10 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
   // Funktion för Excel-export (CSV)
   const exportToExcel = () => {
     const headers = ["Namn,Roll,E-post,Telefon,Konto"];
-    const rows = filteredPeople.map(p => 
+    const rows = filteredPeople.map(p =>
       `"${p.first_name} ${p.last_name}","${p.role || ''}","${p.email || ''}","${p.phone || ''}","${p.account_name || ''}"`
     );
-    
+
     const csvContent = "\uFEFF" + headers.concat(rows).join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -80,33 +80,33 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
       {/* Header & Toggle */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Personer</h2>
-          <span className="text-sm text-gray-500">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Personer</h2>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             {filteredPeople.length} kontakter
           </span>
         </div>
 
-        <div className="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
-          <button 
+        <div className="flex items-center gap-2 bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <button
             onClick={() => setViewMode('grid')}
             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              viewMode === 'grid' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+              viewMode === 'grid' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             Kort
           </button>
-          <button 
+          <button
             onClick={() => setViewMode('table')}
             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              viewMode === 'table' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+              viewMode === 'table' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             Lista
           </button>
-          <div className="w-px h-4 bg-gray-200 mx-1" />
-          <button 
+          <div className="w-px h-4 bg-gray-200 dark:bg-gray-600 mx-1" />
+          <button
             onClick={exportToExcel}
-            className="px-3 py-1.5 text-xs font-bold text-green-600 hover:bg-green-50 rounded-lg transition-all"
+            className="px-3 py-1.5 text-xs font-bold text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-all"
           >
             Export
           </button>
@@ -114,8 +114,8 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
       </div>
 
       {/* Sökfält */}
-      <input 
-        className="w-full bg-white border border-gray-100 p-4 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-700"
+      <input
+        className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
         placeholder="Sök på namn, företag eller roll..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
@@ -125,18 +125,18 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
         /* GRID-VY (Originaldesignen) */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredPeople.map(person => (
-            <div 
-              key={person.id} 
-              className={`bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all group ${
+            <div
+              key={person.id}
+              className={`bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all group ${
                 person.is_active === false ? 'opacity-75 grayscale-[0.3]' : ''
               }`}
             >
               <div className="flex items-start gap-4">
                 {/* Initial-cirkel */}
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border shrink-0 ${
-                  person.is_active === false 
-                    ? 'bg-gray-100 text-gray-400 border-gray-200' 
-                    : 'bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 border-blue-200'
+                  person.is_active === false
+                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                    : 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/50 dark:to-blue-800/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-700'
                 }`}>
                   {person?.first_name || person?.last_name ? (
                     <>
@@ -145,46 +145,46 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
                     </>
                   ) : '?'}
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 
+                    <h3
                       onClick={() => onContactClick(person)}
-                      className="font-bold text-gray-800 group-hover:text-blue-600 transition-colors truncate cursor-pointer hover:underline"
+                      className="font-bold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate cursor-pointer hover:underline"
                     >
                       {person?.first_name || ""} {person?.last_name || ""}
                     </h3>
-                    
+
                     {person.is_active === false && (
-                      <span className="bg-red-50 text-red-600 text-[10px] px-1.5 py-0.5 rounded border border-red-100 font-bold uppercase tracking-tighter">
+                      <span className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] px-1.5 py-0.5 rounded border border-red-100 dark:border-red-800 font-bold uppercase tracking-tighter">
                         Inaktiv
                       </span>
                     )}
                   </div>
-                  
-                  <p 
+
+                  <p
                     onClick={() => onAccountClick && onAccountClick(person.account)}
-                    className="text-xs text-gray-500 font-medium uppercase tracking-wider italic truncate cursor-pointer hover:text-blue-500"
+                    className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider italic truncate cursor-pointer hover:text-blue-500 dark:hover:text-blue-400"
                   >
                     {person?.account_name || 'Inget företag'}
                   </p>
-                  
+
                   {person?.role && (
-                    <p className="text-xs text-blue-500 mt-1">{person.role}</p>
+                    <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">{person.role}</p>
                   )}
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-50 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-400 font-bold uppercase">E-post</span>
-                  <a href={`mailto:${person?.email}`} className="text-gray-600 truncate hover:text-blue-500 transition-colors">
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase">E-post</span>
+                  <a href={`mailto:${person?.email}`} className="text-gray-600 dark:text-gray-300 truncate hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
                     {person?.email || 'Saknas'}
                   </a>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-gray-400 font-bold uppercase">Telefon</span>
-                  <a href={`tel:${person?.phone}`} className="text-gray-600 hover:text-blue-500 transition-colors">
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase">Telefon</span>
+                  <a href={`tel:${person?.phone}`} className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
                     {person?.phone || 'Saknas'}
                   </a>
                 </div>
@@ -194,11 +194,11 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
         </div>
       ) : (
         /* TABELL-VY */
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
+                <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">
                   {[
                     { id: 'name', label: 'Namn' },
                     { id: 'role', label: 'Roll' },
@@ -206,10 +206,10 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
                     { id: 'email', label: 'E-post' },
                     { id: 'phone', label: 'Telefon' }
                   ].map((header) => (
-                    <th 
+                    <th
                       key={header.id}
                       onClick={() => handleSort(header.id)}
-                      className="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-blue-600 transition-colors"
+                      className="p-4 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       <div className="flex items-center gap-1">
                         {header.label}
@@ -221,28 +221,28 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {sortedPeople.map(person => (
-                  <tr key={person.id} className="hover:bg-blue-50/30 transition-colors group">
+                  <tr key={person.id} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/20 transition-colors group">
                     <td className="p-4">
-                      <button 
+                      <button
                         onClick={() => onContactClick(person)}
-                        className="font-bold text-gray-800 hover:text-blue-600 hover:underline text-sm text-left cursor-pointer"
+                        className="font-bold text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 hover:underline text-sm text-left cursor-pointer"
                       >
                         {person.first_name} {person.last_name}
                       </button>
                     </td>
-                    <td className="p-4 text-sm text-gray-600">{person.role || '-'}</td>
+                    <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{person.role || '-'}</td>
                     <td className="p-4">
-                      <button 
+                      <button
                         onClick={() => onAccountClick && onAccountClick(person.account)}
-                        className="text-sm text-blue-500 hover:underline font-medium text-left cursor-pointer"
+                        className="text-sm text-blue-500 dark:text-blue-400 hover:underline font-medium text-left cursor-pointer"
                       >
                         {person.account_name}
                       </button>
                     </td>
-                    <td className="p-4 text-sm text-gray-600 italic font-light">{person.email || '-'}</td>
-                    <td className="p-4 text-sm text-gray-600">{person.phone || '-'}</td>
+                    <td className="p-4 text-sm text-gray-600 dark:text-gray-400 italic font-light">{person.email || '-'}</td>
+                    <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{person.phone || '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -253,8 +253,8 @@ export default function PeopleView({ people, onContactClick, onAccountClick }) {
 
       {/* Tomt läge */}
       {filteredPeople.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-          <p className="text-gray-400 font-medium">Inga personer hittades.</p>
+        <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+          <p className="text-gray-400 dark:text-gray-500 font-medium">Inga personer hittades.</p>
         </div>
       )}
     </div>

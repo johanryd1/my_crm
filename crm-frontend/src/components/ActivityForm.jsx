@@ -28,11 +28,11 @@ export default function ActivityForm({ onAddActivity, contacts }) {
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
       <div className="space-y-4">
         {/* TYP AV AKTIVITET */}
         <div className="space-y-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Logga ny aktivitet</label>
+          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Logga ny aktivitet</label>
           <div className="grid grid-cols-4 gap-2">
             {types.map((type) => (
               <button
@@ -41,8 +41,8 @@ export default function ActivityForm({ onAddActivity, contacts }) {
                 onClick={() => setActivityType(type.id)}
                 className={`flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all ${
                   activityType === type.id
-                    ? 'border-green-500 bg-green-50 text-green-700'
-                    : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200'
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                    : 'border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:border-gray-200 dark:hover:border-gray-500'
                 }`}
               >
                 <type.Icon className="w-5 h-5 mb-1" />
@@ -54,9 +54,9 @@ export default function ActivityForm({ onAddActivity, contacts }) {
 
         {/* KOPPLA TILL KONTAKT */}
         <div className="space-y-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Vem pratade du med? (Valfritt)</label>
+          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vem pratade du med? (Valfritt)</label>
           <select
-            className="w-full border border-gray-200 p-2 rounded-lg bg-gray-50 text-sm outline-none focus:ring-2 focus:ring-green-500 transition-all"
+            className="w-full border border-gray-200 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-green-500 transition-all"
             value={contactId}
             onChange={(e) => setContactId(e.target.value)}
           >
@@ -74,7 +74,7 @@ export default function ActivityForm({ onAddActivity, contacts }) {
       </div>
 
       <textarea
-        className="w-full border border-gray-200 p-3 rounded-lg bg-gray-50 outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all text-sm min-h-[80px]"
+        className="w-full border border-gray-200 dark:border-gray-600 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-green-500 focus:bg-white dark:focus:bg-gray-600 transition-all text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 min-h-[80px]"
         placeholder="Vad hände? Skriv en kort notering..."
         value={note}
         onChange={(e) => setNote(e.target.value)}

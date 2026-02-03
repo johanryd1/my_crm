@@ -1,15 +1,15 @@
 import React from 'react';
 import ActivityLog from './ActivityLog';
 
-export default function ContactModal({ 
-  contact, 
-  activities, 
-  onClose, 
-  isEditing, 
-  setIsEditing, 
-  editData, 
-  setEditData, 
-  onUpdate, 
+export default function ContactModal({
+  contact,
+  activities,
+  onClose,
+  isEditing,
+  setIsEditing,
+  editData,
+  setEditData,
+  onUpdate,
   onDelete,
   onUpdateStatus,
   onDeleteActivity
@@ -22,13 +22,13 @@ export default function ContactModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-all">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20 dark:border-gray-700">
 
         {/* VARNINGSRUTA FÖR INAKTIV KONTAKT */}
           {!contact.is_active && (
-            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg flex justify-between items-center">
-              <span className="text-yellow-800 text-sm font-medium">Denna kontakt är inaktiverad.</span>
-              <button 
+            <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg flex justify-between items-center">
+              <span className="text-yellow-800 dark:text-yellow-200 text-sm font-medium">Denna kontakt är inaktiverad.</span>
+              <button
                 onClick={() => onUpdateStatus(contact.id, true)}
                 className="bg-yellow-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-yellow-700"
               >
@@ -36,19 +36,19 @@ export default function ContactModal({
               </button>
             </div>
           )}
-        
+
         {/* HEADER */}
-        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
+        <div className="p-6 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
             <div className="flex items-center gap-4">
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
                 {isEditing ? "Redigera kontakt" : "Kontaktdetaljer"}
                 </h2>
-                
+
                 {/* RADERA-KNAPP (Soptunna) */}
                 {contact.is_active && !isEditing && (
-                <button 
+                <button
                     onClick={() => onDelete(contact.id)}
-                    className="text-gray-400 hover:text-red-600 transition-colors p-1"
+                    className="text-gray-400 dark:text-gray-500 hover:text-red-600 transition-colors p-1"
                     title="Ta bort kontakt"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -57,7 +57,7 @@ export default function ContactModal({
                 </button>
                 )}
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-black text-2xl">&times;</button>
+            <button onClick={onClose} className="text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white text-2xl">&times;</button>
             </div>
 
         <div className="p-6">
@@ -66,58 +66,58 @@ export default function ContactModal({
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Namn</label>
-                  <p className="text-lg font-semibold text-gray-800">{contact.first_name} {contact.last_name}</p>
+                  <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Namn</label>
+                  <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">{contact.first_name} {contact.last_name}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Roll</label>
-                  <p className="text-lg text-gray-700">{contact.role || "-"}</p>
+                  <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Roll</label>
+                  <p className="text-lg text-gray-700 dark:text-gray-300">{contact.role || "-"}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">E-post</label>
+                  <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">E-post</label>
                   <p>
-                    <a 
-                      href={`mailto:${contact.email}`} 
-                      target="_blank" 
+                    <a
+                      href={`mailto:${contact.email}`}
+                      target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors"
                     >
                       {contact.email}
                     </a>
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Telefon</label>
-                  <p className="text-gray-700">{contact.phone || "-"}</p>
+                  <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Telefon</label>
+                  <p className="text-gray-700 dark:text-gray-300">{contact.phone || "-"}</p>
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => setIsEditing(true)}
-                className="w-full bg-blue-50 text-blue-600 py-2 rounded-lg font-bold hover:bg-blue-100 transition"
+                className="w-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 py-2 rounded-lg font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition"
               >
                 Redigera uppgifter
               </button>
 
               {/* KONTAKTSPECIFIK HISTORIK */}
-              <ActivityLog activities={activities} 
-              contactId={contact.id} 
+              <ActivityLog activities={activities}
+              contactId={contact.id}
               onDeleteActivity={onDeleteActivity} />
             </div>
           ) : (
             /* --- REDIGERINGSLÄGE --- */
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <input className="border p-2 rounded" value={editData.first_name || ''} onChange={e => setEditData({...editData, first_name: e.target.value})} placeholder="Förnamn" />
-                <input className="border p-2 rounded" value={editData.last_name || ''} onChange={e => setEditData({...editData, last_name: e.target.value})} placeholder="Efternamn" />
+                <input className="border dark:border-gray-600 p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" value={editData.first_name || ''} onChange={e => setEditData({...editData, first_name: e.target.value})} placeholder="Förnamn" />
+                <input className="border dark:border-gray-600 p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" value={editData.last_name || ''} onChange={e => setEditData({...editData, last_name: e.target.value})} placeholder="Efternamn" />
               </div>
-              <input className="border p-2 rounded w-full" value={editData.role || ''} onChange={e => setEditData({...editData, role: e.target.value})} placeholder="Roll" />
-              <input className="border p-2 rounded w-full" value={editData.phone || ''} onChange={e => setEditData({...editData, phone: e.target.value})} placeholder="Telefon" />
-              <input className="border p-2 rounded w-full" value={editData.email || ''} onChange={e => setEditData({...editData, email: e.target.value})} placeholder="E-post" />
-              
+              <input className="border dark:border-gray-600 p-2 rounded w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" value={editData.role || ''} onChange={e => setEditData({...editData, role: e.target.value})} placeholder="Roll" />
+              <input className="border dark:border-gray-600 p-2 rounded w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" value={editData.phone || ''} onChange={e => setEditData({...editData, phone: e.target.value})} placeholder="Telefon" />
+              <input className="border dark:border-gray-600 p-2 rounded w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" value={editData.email || ''} onChange={e => setEditData({...editData, email: e.target.value})} placeholder="E-post" />
+
               <div className="flex gap-2 pt-4">
                 <button onClick={onUpdate} className="flex-1 bg-green-600 text-white p-2 rounded font-bold">Spara</button>
-                <button onClick={() => setIsEditing(false)} className="flex-1 bg-gray-200 text-gray-700 p-2 rounded font-bold">Avbryt</button>
+                <button onClick={() => setIsEditing(false)} className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 p-2 rounded font-bold">Avbryt</button>
               </div>
             </div>
           )}
