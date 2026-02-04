@@ -46,15 +46,18 @@ npm run lint     # Run ESLint
 
 ### API Endpoints
 All endpoints at `/api/`:
-- `/accounts/`, `/contacts/`, `/deals/`, `/activities/`, `/deal-phases/`
+- `/accounts/`, `/contacts/`, `/deals/`, `/activities/`, `/deal-phases/`, `/products/`
 
 ### Frontend Structure (crm-frontend/src/)
 - `App.jsx` - Main component with centralized state management (useState/useEffect)
 - `api.js` - Axios configuration using VITE_API_URL
 - `components/` - UI components:
   - `PipelineView.jsx` - Kanban board with @dnd-kit drag & drop
-  - `DealModal.jsx`, `ContatcModal.jsx` - Detail/edit modals
+  - `DealModal.jsx`, `ContactModal.jsx` - Detail/edit modals
   - `ActivityForm.jsx`, `ActivityLog.jsx` - Activity management
+  - `Settings.jsx` - Settings page with sidebar navigation
+  - `settings/DealPhaseSettings.jsx` - CRUD for deal phases
+  - `settings/ProductSettings.jsx` - CRUD for products
 
 ## Deployment
 
