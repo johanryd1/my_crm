@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import DealPhaseSettings from './settings/DealPhaseSettings';
-// Future settings pages can be imported here:
-// import AccountSettings from './settings/AccountSettings';
+import ProductSettings from './settings/ProductSettings';
 
 const SETTINGS_PAGES = [
   { id: 'deal-phases', label: 'Affärsfaser', component: DealPhaseSettings },
-  // To add a new settings page:
-  // 1. Create the component in ./settings/
-  // 2. Import it above
-  // 3. Add an entry here: { id: 'unique-id', label: 'Display Name', component: YourComponent }
+  { id: 'products', label: 'Produkter', component: ProductSettings },
 ];
 
 export default function Settings() {
