@@ -41,6 +41,8 @@ npm run lint     # Run ESLint
 - **Contact** - People within accounts (belongs to Account)
 - **Deal** - Sales opportunities (belongs to Account and DealPhase, has documents JSON field)
 - **Activity** - Logged interactions (belongs to Account, Contact, and/or Deal)
+- **Product** - Products/services that can be sold
+- **DealProduct** - Junction table linking products to deals (with quantity, price)
 
 ### API Endpoints
 All endpoints at `/api/`:

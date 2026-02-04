@@ -70,3 +70,48 @@ class Activity(models.Model):
 
     def __str__(self):
         return f"{self.activity_type} - {self.account.name if self.account else 'Inget företag'}"
+
+
+class Product(models.Model):
+    # Typer av produkter/tjänster
+    PRODUCT_TYPES = [
+        ('service', 'Tjänst'),
+        ('hardware', 'Hårdvara'),
+        ('software', 'Mjukvara'),
+        ('subscription', 'Prenumeration'),
+    ]
+
+    name = models.CharField(max_length=255, verbose_name="Produktnamn")
+    sku = models.CharField(max_length=50, unique=True, blank=True, null=True, verbose_name="Artikelnummer")
+    description = models.TextField(blank=True, verbose_name="Beskrivning")
+    
+    # Prissättning
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.0, verbose_name="Listpris")
+    cost_price = models.DecimalField(max_digits=12, decimal_places=2, default=0.0, verbose_name="Inköpspris/Kostnad")
+    
+    # Kategorisering
+    product_type = models.CharField(max_length=20, choices=PRODUCT_TYPES, default='service')
+    is_active = models.BooleanField(default=True, verbose_name="Aktiv")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.sku})" if self.sku else self.name
+
+    class Meta:
+        verbose_name = "Produkt"
+        verbose_name_plural = "Produkter"
+        ordering = ['name']
+
+
+class DealProduct(models.Model):
+    deal = models.ForeignKey('Deal', on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField(default=1)
+    # Vi sparar priset här också ifall man ger rabatt på just denna affär
+    sale_price = models.DecimalField(max_digits=12, decimal_places=2) 
+
+    def total_amount(self):
+        return self.quantity * self.sale_price
+    
